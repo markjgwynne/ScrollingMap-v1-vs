@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="collision.h" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
