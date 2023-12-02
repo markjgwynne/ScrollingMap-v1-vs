@@ -9,42 +9,80 @@
 
 #include "olcPixelGameEngine.h"
 
-#include "background.h"
-#include "car.h"
+#include "map.h"
+#include "player.h"
 
 
-namespace CarRace
+namespace ScrollingMap
 {
-
 	class Game : public olc::PixelGameEngine
 	{
+	private:
+		#define PI 3.14159265
+
 	public:
 		Game()
 		{
-			sAppName = "Car Racing Game";
+			sAppName = "Scrolling Map";
 		}
-
-	private:
-
-#define PI 3.14159265
-
-	public:
-
-		GameBackground background;
-
-		GameCar car;
-
+				
 		float fMovementIncrement = 100.0f;
 
-		//olc::vf2d vfPlayerPos = {0.0f, 0.0f};
+		olc::vf2d vfPlayerPos = { 4.0f, 4.0f };
 		olc::vf2d vfCameraPos = { 0.0f, 0.0f };
+		
+		olc::vi2d chunkCount = { 2, 2 };
+		olc::vi2d tileCount = { 8, 8 };
+		olc::vi2d tileSize = { 16, 16 };
+
+		std::string sChunk[4] =
+		{ 
+			"..|....."
+			"+++++++."
+			"....|.+."
+			"......+|"
+			"..|...++"
+			".....|.."
+			"...|...."
+			".|....|.",
+
+			"..|...+."
+			".|....+."
+			"....|.+."
+			".++++++|"
+			"++..|..."
+			".+...|.."
+			".++.|..."
+			".|+...|.",
+
+			"..|....."
+			"....|..."
+			"...|.+++"
+			".|..|+.|"
+			".....+.."
+			"++++++.."
+			"..|..+.."
+			".|...+.|",
+
+			"..+..|.."
+			"..+|...."
+			"+++.|..."
+			"..+++..|"
+			"..|.+..."
+			"....+|.."
+			"..||++++"
+			".|....|."
+
+		};
+
+		MapGenerator map;
+		Character player = Character(&vfPlayerPos, &tileSize);
+
 
 		bool OnUserCreate() override
 		{
 
-			background.LoadBackground(this, 8, 8);
-
-			car.LoadCar(this, background.vBackgroundSize * 0.5f);
+			map.GenerateChunks(&chunkCount, &tileCount, &tileSize, sChunk);
 
 			return true;
 		}
@@ -53,34 +91,26 @@ namespace CarRace
 		{
 
 			// HANDLE MOVEMENT AND COLLISION DETECTION
+			
+			player.Update(this);
 
-			olc::vf2d projectedPosition = car.ProjectMovement(this, fElapsedTime);
-
-			car.vCarPos = projectedPosition;
-
-
+			
 			// RENDER SCREEN
 
-			olc::vf2d vfCameraOffset = { float(ScreenWidth()) * 0.5f, float(ScreenHeight()) * 0.5f };
-			vfCameraPos = car.vCarPos - vfCameraOffset;
+			Clear(olc::WHITE);
 
-			Clear(olc::DARK_GREEN);
+			map.Render(this);
 
-			background.RenderBackground(this, vfCameraPos, ScreenWidth(), ScreenHeight());
-
-			car.Render(this, vfCameraOffset);
-
-			DrawString(1, 1, "Camera Pos, X: " + std::to_string(vfCameraPos.x) + ", Y: " + std::to_string(vfCameraPos.y) + " | Player Pos, X: " + std::to_string(car.vCarPos.x) + ", Y: " + std::to_string(car.vCarPos.y), olc::WHITE);
+			player.Render(this);
 
 			return true;
 		}
 	};
-
 }
 
 int main()
 {
-	CarRace::Game demo;
+	ScrollingMap::Game demo;
 	if (demo.Construct(800, 400, 2, 2))
 		demo.Start();
 

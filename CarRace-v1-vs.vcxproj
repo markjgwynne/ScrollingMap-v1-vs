@@ -24,6 +24,7 @@
     <ProjectGuid>{1638e7fe-7e8f-487c-a623-01b550d192db}</ProjectGuid>
     <RootNamespace>CarRacev1vs</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>ScrollingMap-v1-vs</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -129,13 +130,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="collision.h" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="background.h" />
-    <ClInclude Include="car.h" />
+    <ClInclude Include="map.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
+    <ClInclude Include="player.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="gfx\sports-car-sml.png" />
