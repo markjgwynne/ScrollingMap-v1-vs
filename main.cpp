@@ -9,7 +9,7 @@
 
 #include "olcPixelGameEngine.h"
 
-#include "map.h"
+#include "world.h"
 #include "player.h"
 
 
@@ -35,54 +35,13 @@ namespace ScrollingMap
 		olc::vi2d tileCount = { 8, 8 };
 		olc::vi2d tileSize = { 16, 16 };
 
-		std::string sChunk[4] =
-		{ 
-			"..|....."
-			"+++++++."
-			"....|.+."
-			"......+|"
-			"..|...++"
-			".....|.."
-			"...|...."
-			".|....|.",
-
-			"..|...+."
-			".|....+."
-			"....|.+."
-			".++++++|"
-			"++..|..."
-			".+...|.."
-			".++.|..."
-			".|+...|.",
-
-			"..|....."
-			"....|..."
-			"...|.+++"
-			".|..|+.|"
-			".....+.."
-			"++++++.."
-			"..|..+.."
-			".|...+.|",
-
-			"..+..|.."
-			"..+|...."
-			"+++.|..."
-			"..+++..|"
-			"..|.+..."
-			"....+|.."
-			"..||++++"
-			".|....|."
-
-		};
-
-		MapGenerator map;
+		GameWorld world = GameWorld(&chunkCount, &tileCount, &tileSize);
 		Character player = Character(&vfPlayerPos, &tileSize);
-
 
 		bool OnUserCreate() override
 		{
 
-			map.GenerateChunks(&chunkCount, &tileCount, &tileSize, sChunk);
+			world.GenerateChunks();
 
 			return true;
 		}
@@ -99,7 +58,7 @@ namespace ScrollingMap
 
 			Clear(olc::WHITE);
 
-			map.Render(this);
+			world.Render(this);
 
 			player.Render(this);
 

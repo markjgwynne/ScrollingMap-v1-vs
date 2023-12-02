@@ -133,7 +133,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="map.h" />
+    <ClInclude Include="world.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
     <ClInclude Include="player.h" />
   </ItemGroup>

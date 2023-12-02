@@ -1,6 +1,9 @@
 
 using namespace std;
 
+#include <iostream>
+#include <random>
+
 #include "olcPixelGameEngine.h"
 
 #ifndef MAP_H_INCLUDED
@@ -24,10 +27,9 @@ namespace ScrollingMap
 		olc::vi2d *viTileSize;
 		tiletype eTileType;
 
-		tile(olc::vf2d position, olc::vi2d *tileSize, tiletype tile_type) {
+		tile(olc::vf2d position, olc::vi2d *tileSize) {
 			vfPosition = position;
 			viTileSize = tileSize;
-			eTileType = tile_type;
 		}
 
 		~tile() {
@@ -35,28 +37,7 @@ namespace ScrollingMap
 		}
 
 		void Render(olc::PixelGameEngine* pge) {
-
-			olc::Pixel colour;
-			switch(eTileType) {
-			case Grass:
-				colour = olc::GREEN;
-				break;
-
-			case Tree:
-				colour = olc::DARK_GREEN;
-				break;
-
-			case Sand:
-				colour = olc::YELLOW;
-				break;
-
-			case Path:
-				colour = olc::DARK_GREY;
-				break;
-
-			}
-
-			pge->FillRect(vfPosition, olc::vi2d(viTileSize->x, viTileSize->y), colour);
+			pge->FillRect(vfPosition, olc::vi2d(viTileSize->x, viTileSize->y), olc::GREEN);
 		}
 
 	};
@@ -70,13 +51,13 @@ namespace ScrollingMap
 
 		std::vector<std::unique_ptr<tile>> vTiles;
 
-		chunk(olc::vf2d position, olc::vi2d *tileCount, olc::vi2d *tileSize, std::string sChunk) {
+		chunk(olc::vf2d position, olc::vi2d *tileCount, olc::vi2d *tileSize) {
 			
 			vfPosition = position;
 			viChunkTileCount = tileCount;
 			viTileSize = tileSize;
 
-			GenerateTiles(sChunk);
+			GenerateTiles();
 		}
 
 		~chunk() {
@@ -84,35 +65,11 @@ namespace ScrollingMap
 			delete viTileSize;
 		}
 
-		void GenerateTiles(std::string sChunk)
+		void GenerateTiles()
 		{
 			for (int x = 0; x < viChunkTileCount->x; x++) {
 				for (int y = 0; y < viChunkTileCount->y; y++) {
-					tiletype eTileType;
-					switch (sChunk[x * viChunkTileCount->y + y])
-					{
-					case '.':
-						eTileType = Grass;
-						break;
-
-					case '|':
-						eTileType = Tree;
-						break;
-
-					case '#':
-						eTileType = Sand;
-						break;
-
-					case '+':
-						eTileType = Path;
-						break;
-
-					default:
-						eTileType = Grass;
-					
-					}				
-					vTiles.push_back(std::make_unique<tile>(olc::vf2d(vfPosition.x + (x * viTileSize->x), vfPosition.y + (y * viTileSize->y)), viTileSize, eTileType));
-
+					vTiles.push_back(std::make_unique<tile>(olc::vf2d(vfPosition.x + (x * viTileSize->x), vfPosition.y + (y * viTileSize->y)), viTileSize));
 				}
 			}
 		}
@@ -128,8 +85,10 @@ namespace ScrollingMap
 
 	};
 	
-    class MapGenerator {
+    class GameWorld {
         public:
+
+			int seed = 123;
 
 			olc::vi2d *viChunkCount;
 			olc::vi2d *viChunkTileCount;
@@ -137,27 +96,41 @@ namespace ScrollingMap
 
 			std::vector<std::unique_ptr<chunk>> vChunk;
 
-			MapGenerator() {
-                
+			GameWorld(olc::vi2d* chunkCount, olc::vi2d* tileCount, olc::vi2d* tileSize) {
+				viChunkCount = chunkCount;
+				viChunkTileCount = tileCount;
+				viTileSize = tileSize;
             };
 
-            ~MapGenerator() {
+            ~GameWorld() {
 				delete viChunkCount;
 				delete viChunkTileCount;
 				delete viTileSize;
             };
 
-			void GenerateChunks(olc::vi2d *chunkCount, olc::vi2d *tileCount, olc::vi2d *tileSize, std::string sChunk[])
-			{
+			void GenerateWorld(int worldSeed) {
 
-				viChunkCount = chunkCount;
-				viChunkTileCount = tileCount;
-				viTileSize = tileSize;
-				
-				for (int x = 0; x < chunkCount->x; x++) {
-					for (int y = 0; y < chunkCount->y; y++) {
+				seed = worldSeed;
+
+				// Create a random number generator and seed it with a fixed value
+				std::mt19937 generator(seed);
+
+				// Create a distribution range
+				std::uniform_int_distribution<int> distribution(1, 100);
+
+				// Generate and print 5 random numbers
+				for (int i = 0; i < 5; ++i) {
+					int random_number = distribution(generator);
+				}
+
+			}
+						
+			void GenerateChunks(olc::vf2d vfPlayerPosition)
+			{
+				for (int x = 0; x < viChunkCount->x; x++) {
+					for (int y = 0; y < viChunkCount->y; y++) {
 						vChunk.push_back(std::make_unique<chunk>(olc::vf2d(x * (viChunkTileCount->x * viTileSize->x), y * (viChunkTileCount->y * viTileSize->y)),
-							tileCount, tileSize, sChunk[x * chunkCount->y + y]));
+							viChunkTileCount, viTileSize));
 					}
 				}
 
@@ -171,7 +144,6 @@ namespace ScrollingMap
 				}
 
 			}
-           
 
     };
 }
