@@ -9,7 +9,7 @@
 
 #include "olcPixelGameEngine.h"
 
-#include "map.h"
+#include "world.h"
 #include "player.h"
 
 
@@ -25,64 +25,28 @@ namespace ScrollingMap
 		{
 			sAppName = "Scrolling Map";
 		}
+
+		~Game()
+		{
+			
+		}
 				
 		float fMovementIncrement = 100.0f;
 
-		olc::vf2d vfPlayerPos = { 4.0f, 4.0f };
+		olc::vf2d vfPlayerPos = { 20.0f, 4.0f };
 		olc::vf2d vfCameraPos = { 0.0f, 0.0f };
 		
-		olc::vi2d chunkCount = { 2, 2 };
+		olc::vi2d chunkCount = { 4, 4 };
 		olc::vi2d tileCount = { 8, 8 };
 		olc::vi2d tileSize = { 16, 16 };
 
-		std::string sChunk[4] =
-		{ 
-			"..|....."
-			"+++++++."
-			"....|.+."
-			"......+|"
-			"..|...++"
-			".....|.."
-			"...|...."
-			".|....|.",
-
-			"..|...+."
-			".|....+."
-			"....|.+."
-			".++++++|"
-			"++..|..."
-			".+...|.."
-			".++.|..."
-			".|+...|.",
-
-			"..|....."
-			"....|..."
-			"...|.+++"
-			".|..|+.|"
-			".....+.."
-			"++++++.."
-			"..|..+.."
-			".|...+.|",
-
-			"..+..|.."
-			"..+|...."
-			"+++.|..."
-			"..+++..|"
-			"..|.+..."
-			"....+|.."
-			"..||++++"
-			".|....|."
-
-		};
-
-		MapGenerator map;
+		GameWorld world = GameWorld(&chunkCount, &tileCount, &tileSize);
 		Character player = Character(&vfPlayerPos, &tileSize);
-
 
 		bool OnUserCreate() override
 		{
 
-			map.GenerateChunks(&chunkCount, &tileCount, &tileSize, sChunk);
+			world.GenerateChunks(&vfPlayerPos);
 
 			return true;
 		}
@@ -90,18 +54,24 @@ namespace ScrollingMap
 		bool OnUserUpdate(float fElapsedTime) override
 		{
 
+			Clear(olc::WHITE);
+
 			// HANDLE MOVEMENT AND COLLISION DETECTION
 			
 			player.Update(this);
 
+			world.Update(this, &vfPlayerPos);
+
+			// RENDER SCREEN	
 			
-			// RENDER SCREEN
+			//Clear(olc::WHITE);
 
-			Clear(olc::WHITE);
-
-			map.Render(this);
+			world.Render(this);
 
 			player.Render(this);
+
+			DrawString(1, 1, player.sPlayerLocation, olc::BLACK);
+			DrawString(1, 11, world.sChunkLocation, olc::BLACK);
 
 			return true;
 		}
