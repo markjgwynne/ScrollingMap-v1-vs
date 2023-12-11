@@ -3,6 +3,8 @@ using namespace std;
 
 #include <iostream>
 #include <random>
+#include <map>
+#include <math.h>
 
 #include "olcPixelGameEngine.h"
 
@@ -20,6 +22,9 @@ namespace ScrollingMap
 		Path
 	};
 
+
+	std::map<tiletype, olc::Pixel> tileMap;
+
 	class tile 
 	{
 	public:
@@ -27,18 +32,27 @@ namespace ScrollingMap
 		olc::vi2d *viTileSize;
 		tiletype eTileType;
 
-		tile(olc::vf2d position, olc::vi2d *tileSize) {
+		tile(olc::vf2d position, olc::vi2d* tileSize) {
 			vfPosition = position;
 			viTileSize = tileSize;
-		}
+			eTileType = Grass;
+
+			AddLayerTrees();
+		};
 
 		~tile() {
-			delete viTileSize;
-		}
+			//delete viTileSize;
+		};
+
+		void AddLayerTrees() {
+
+			if (rand() % 6 == 0) eTileType = Tree;
+
+		};
 
 		void Render(olc::PixelGameEngine* pge) {
-			pge->FillRect(vfPosition, olc::vi2d(viTileSize->x, viTileSize->y), olc::GREEN);
-		}
+			pge->FillRect(vfPosition, olc::vi2d(viTileSize->x, viTileSize->y), tileMap[eTileType]);
+		};
 
 	};
 
@@ -48,21 +62,24 @@ namespace ScrollingMap
 		olc::vf2d vfPosition;
 		olc::vi2d *viChunkTileCount;
 		olc::vi2d *viTileSize;
+		bool bPlayerInChunk;
 
 		std::vector<std::unique_ptr<tile>> vTiles;
 
-		chunk(olc::vf2d position, olc::vi2d *tileCount, olc::vi2d *tileSize) {
+		chunk(olc::vf2d position, olc::vi2d* tileCount, olc::vi2d* tileSize) {
 			
 			vfPosition = position;
 			viChunkTileCount = tileCount;
 			viTileSize = tileSize;
 
+			bPlayerInChunk = false;
+
 			GenerateTiles();
 		}
 
 		~chunk() {
-			delete viChunkTileCount;
-			delete viTileSize;
+			//delete viChunkTileCount;
+			//delete viTileSize;
 		}
 
 		void GenerateTiles()
@@ -72,6 +89,17 @@ namespace ScrollingMap
 					vTiles.push_back(std::make_unique<tile>(olc::vf2d(vfPosition.x + (x * viTileSize->x), vfPosition.y + (y * viTileSize->y)), viTileSize));
 				}
 			}
+		}
+
+		bool PlayerInChunk(olc::vf2d* vfPlayerPosition) {
+
+			if (vfPlayerPosition->x * viTileSize->x >= vfPosition.x && vfPlayerPosition->x * viTileSize->x < vfPosition.x + (viChunkTileCount->x * viTileSize->x) &&
+				vfPlayerPosition->y * viTileSize->y >= vfPosition.y && vfPlayerPosition->y * viTileSize->y < vfPosition.y + (viChunkTileCount->y * viTileSize->y) ) {
+				bPlayerInChunk = true;
+			} else {
+				bPlayerInChunk = false;
+			}
+			return bPlayerInChunk;
 		}
 
 		void Render(olc::PixelGameEngine* pge) {
@@ -90,9 +118,13 @@ namespace ScrollingMap
 
 			int seed = 123;
 
-			olc::vi2d *viChunkCount;
-			olc::vi2d *viChunkTileCount;
-			olc::vi2d *viTileSize;
+			olc::vi2d* viChunkCount;
+			olc::vi2d* viChunkTileCount;
+			olc::vi2d* viTileSize;
+
+			int iChunkIndex;
+
+			std::string sChunkLocation;
 
 			std::vector<std::unique_ptr<chunk>> vChunk;
 
@@ -100,13 +132,19 @@ namespace ScrollingMap
 				viChunkCount = chunkCount;
 				viChunkTileCount = tileCount;
 				viTileSize = tileSize;
-            };
 
-            ~GameWorld() {
-				delete viChunkCount;
-				delete viChunkTileCount;
-				delete viTileSize;
-            };
+				tileMap[Grass] = olc::GREEN;
+				tileMap[Tree] = olc::DARK_GREEN;
+				tileMap[Sand] = olc::DARK_YELLOW;
+				tileMap[Path] = olc::GREY;
+
+            }
+
+			~GameWorld() {
+				//delete viChunkCount;
+				//delete viChunkTileCount;
+				//delete viTileSize;
+			}
 
 			void GenerateWorld(int worldSeed) {
 
@@ -124,8 +162,8 @@ namespace ScrollingMap
 				}
 
 			}
-						
-			void GenerateChunks(olc::vf2d vfPlayerPosition)
+			
+			void GenerateChunks(olc::vf2d* vfChunkPosition)
 			{
 				for (int x = 0; x < viChunkCount->x; x++) {
 					for (int y = 0; y < viChunkCount->y; y++) {
@@ -136,13 +174,70 @@ namespace ScrollingMap
 
 			}
 
+			void Update(olc::PixelGameEngine* pge, olc::vf2d* vfPlayerPosition) {
+				//x * chunkCountWidth + y;
+
+				for (int x = 0; x < viChunkCount->x; x++) {
+					for (int y = 0; y < viChunkCount->y; y++) {
+						vChunk[x * viChunkCount->x + y]->bPlayerInChunk = false;
+					}
+				}
+
+				int posX = std::floor((vfPlayerPosition->x / viChunkTileCount->x));
+				int posY = std::floor((vfPlayerPosition->y / viChunkTileCount->y));
+
+				iChunkIndex = posX * viChunkCount->x + posY;
+
+				vChunk[iChunkIndex]->bPlayerInChunk = true;
+				
+				sChunkLocation = "Chunk index: " + std::to_string(iChunkIndex) + " of " + std::to_string(vChunk.size());
+
+			}
+
+			void Update_v1(olc::PixelGameEngine* pge, olc::vf2d* vfPlayerPosition) {
+
+				int index = 0;
+				for (auto& chunk : vChunk) // access by reference to avoid copying
+				{
+					if (chunk->PlayerInChunk(vfPlayerPosition)) {
+						iChunkIndex = index;
+						break;
+					}
+					index += 1;
+				}
+
+				sChunkLocation = "Chunk index: " + std::to_string(iChunkIndex) + " of " + std::to_string(vChunk.size());
+
+			}
+
+			void Update_original(olc::PixelGameEngine* pge, olc::vf2d* vfPlayerPosition) {
+
+				int index = 0;
+				for (auto& chunk : vChunk) // access by reference to avoid copying
+				{
+					if (chunk->PlayerInChunk(vfPlayerPosition)) {
+						iChunkIndex = index;
+						pge->DrawString({ pge->ScreenWidth() - 200, index * 10 + 1 }, "In chunk index: " + std::to_string(index) + ": true", olc::BLACK);
+					}
+					else {
+						pge->DrawString({ pge->ScreenWidth() - 200, index * 10 + 1 }, "In chunk index: " + std::to_string(index) + ": false", olc::BLACK);
+					}
+					index += 1;
+				}
+
+				sChunkLocation = "Chunk location index: " + std::to_string(iChunkIndex) + " of " + std::to_string(vChunk.size());
+
+			}
+
 			void Render(olc::PixelGameEngine* pge) {
 
 				for (auto& chunk : vChunk) // access by reference to avoid copying
 				{
-					chunk->Render(pge);
+					if (chunk->bPlayerInChunk) {
+						chunk->Render(pge);
+					}
 				}
-
+			
 			}
 
     };

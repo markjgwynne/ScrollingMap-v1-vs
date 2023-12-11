@@ -16,6 +16,8 @@ namespace ScrollingMap
 		olc::vf2d *vfPosition;
 		olc::vi2d *viTileSize;
 
+		std::string sPlayerLocation;
+
 		Character(olc::vf2d *position, olc::vi2d *tileSize) {
 
 			vfPosition = position;
@@ -23,8 +25,8 @@ namespace ScrollingMap
 
 		}
 		~Character() {
-			delete vfPosition;
-			delete viTileSize;
+			//delete vfPosition;
+			//delete viTileSize;
 		}
 
 		void Update(olc::PixelGameEngine* pge) {
@@ -34,7 +36,7 @@ namespace ScrollingMap
 			if (pge->GetKey(olc::Key::A).bPressed) vfPosition->x -= 1;
 			if (pge->GetKey(olc::Key::D).bPressed) vfPosition->x += 1;
 
-			;
+			sPlayerLocation = "Player position, x: " + std::to_string(vfPosition->x) + ", y: " + std::to_string(vfPosition->y);
 
 		}
 

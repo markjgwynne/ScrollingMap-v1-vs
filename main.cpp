@@ -25,13 +25,18 @@ namespace ScrollingMap
 		{
 			sAppName = "Scrolling Map";
 		}
+
+		~Game()
+		{
+			
+		}
 				
 		float fMovementIncrement = 100.0f;
 
-		olc::vf2d vfPlayerPos = { 4.0f, 4.0f };
+		olc::vf2d vfPlayerPos = { 20.0f, 4.0f };
 		olc::vf2d vfCameraPos = { 0.0f, 0.0f };
 		
-		olc::vi2d chunkCount = { 2, 2 };
+		olc::vi2d chunkCount = { 4, 4 };
 		olc::vi2d tileCount = { 8, 8 };
 		olc::vi2d tileSize = { 16, 16 };
 
@@ -41,7 +46,7 @@ namespace ScrollingMap
 		bool OnUserCreate() override
 		{
 
-			world.GenerateChunks();
+			world.GenerateChunks(&vfPlayerPos);
 
 			return true;
 		}
@@ -49,18 +54,24 @@ namespace ScrollingMap
 		bool OnUserUpdate(float fElapsedTime) override
 		{
 
+			Clear(olc::WHITE);
+
 			// HANDLE MOVEMENT AND COLLISION DETECTION
 			
 			player.Update(this);
 
-			
-			// RENDER SCREEN
+			world.Update(this, &vfPlayerPos);
 
-			Clear(olc::WHITE);
+			// RENDER SCREEN	
+			
+			//Clear(olc::WHITE);
 
 			world.Render(this);
 
 			player.Render(this);
+
+			DrawString(1, 1, player.sPlayerLocation, olc::BLACK);
+			DrawString(1, 11, world.sChunkLocation, olc::BLACK);
 
 			return true;
 		}
