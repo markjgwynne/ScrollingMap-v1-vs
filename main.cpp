@@ -36,7 +36,7 @@ namespace ScrollingMap
 		olc::vf2d vfPlayerPos = { 20.0f, 4.0f };
 		olc::vf2d vfCameraPos = { 0.0f, 0.0f };
 		
-		olc::vi2d chunkCount = { 4, 4 };
+		olc::vi2d chunkCount = { 20, 20 };
 		olc::vi2d tileCount = { 8, 8 };
 		olc::vi2d tileSize = { 16, 16 };
 
