@@ -40,9 +40,9 @@ namespace ScrollingMap
 
 		}
 
-		void Render(olc::PixelGameEngine* pge) {
+		void Render(olc::PixelGameEngine* pge, olc::vf2d* vfCameraOffset) {
 
-			pge->FillRect(*vfPosition * *viTileSize, *viTileSize, olc::RED);
+			pge->FillRect(*vfCameraOffset * *viTileSize, *viTileSize, olc::RED);
 
 		}
 
