@@ -18,6 +18,8 @@ namespace ScrollingMap
 
 		std::string sPlayerLocation;
 
+		int iMovementSpeed = 10;
+
 		Character(olc::vf2d *position, olc::vi2d *tileSize) {
 
 			vfPosition = position;
@@ -36,12 +38,22 @@ namespace ScrollingMap
 			if (pge->GetKey(olc::Key::A).bPressed) vfPosition->x -= 1;
 			if (pge->GetKey(olc::Key::D).bPressed) vfPosition->x += 1;
 
+			if (pge->GetKey(olc::Key::W).bHeld) vfPosition->y -= iMovementSpeed * pge->GetElapsedTime();
+			if (pge->GetKey(olc::Key::S).bHeld) vfPosition->y += iMovementSpeed * pge->GetElapsedTime();
+			if (pge->GetKey(olc::Key::A).bHeld) vfPosition->x -= iMovementSpeed * pge->GetElapsedTime();
+			if (pge->GetKey(olc::Key::D).bHeld) vfPosition->x += iMovementSpeed * pge->GetElapsedTime();
+
 			sPlayerLocation = "Player position, x: " + std::to_string(vfPosition->x) + ", y: " + std::to_string(vfPosition->y);
 
 		}
 
 		void Render(olc::PixelGameEngine* pge, olc::vf2d* vfCameraOffset) {
 
+			//pge->FillRect(*vfPosition * *viTileSize, *viTileSize, olc::RED);
+			
+			// you get fractions of a position movement with button held using elapsed time. Change to integer to floor the number before multiplying by the tile size
+			//pge->FillRect(olc::vi2d(*vfPosition) * *viTileSize, *viTileSize, olc::RED);
+			
 			pge->FillRect(*vfCameraOffset * *viTileSize, *viTileSize, olc::RED);
 
 		}
