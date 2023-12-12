@@ -50,16 +50,15 @@ namespace ScrollingMap
 
 		};
 
-		void Render(olc::PixelGameEngine* pge, olc::vf2d* vfCameraOffset, olc::vf2d* vfPlayerPos) {
+		void Render(olc::PixelGameEngine* pge, olc::vf2d* vfOffset) {
 
-			//pge->FillRect(vfPosition, olc::vi2d(viTileSize->x, viTileSize->y), tileMap[eTileType]);
-
+			pge->FillRect(vfPosition - *vfOffset, olc::vi2d(viTileSize->x, viTileSize->y), tileMap[eTileType]);
 
 			//vfCameraOffset -= vfPlayerPos;
 
-			olc::vi2d vfWorldSpace = *vfCameraOffset - *vfPlayerPos;
+			//olc::vi2d vfWorldSpace = vfPosition  - (*vfPlayerPos - *vfCameraOffset);
 
-			pge->FillRect(vfWorldSpace * *viTileSize, olc::vi2d(viTileSize->x, viTileSize->y), tileMap[eTileType]);
+			//pge->FillRect(vfWorldSpace * *viTileSize, olc::vi2d(viTileSize->x, viTileSize->y), tileMap[eTileType]);
 			
 		};
 
@@ -111,11 +110,11 @@ namespace ScrollingMap
 			return bPlayerInChunk;
 		}
 
-		void Render(olc::PixelGameEngine* pge, olc::vf2d* vfCameraOffset, olc::vf2d* vfPLayerPos) {
+		void Render(olc::PixelGameEngine* pge, olc::vf2d* vfCameraOffset) {
 
 			for (auto& tile : vTiles) // access by reference to avoid copying
 			{
-				tile->Render(pge, vfCameraOffset, vfPLayerPos);
+				tile->Render(pge, vfCameraOffset);
 			}
 
 		}
@@ -210,12 +209,12 @@ namespace ScrollingMap
 
 			}
 
-			void Render(olc::PixelGameEngine* pge, olc::vf2d* vfCameraOffset, olc::vf2d* vfPLayerPos) {
+			void Render(olc::PixelGameEngine* pge, olc::vf2d* vfCameraOffset) {
 
 				for (auto& chunk : vChunk) // access by reference to avoid copying
 				{
 					if (chunk->bPlayerInChunk) {
-						chunk->Render(pge, vfCameraOffset, vfPLayerPos);
+					chunk->Render(pge, vfCameraOffset);
 					}
 				}
 			

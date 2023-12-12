@@ -62,13 +62,15 @@ namespace ScrollingMap
 
 			world.Update(this, &vfPlayerPos);
 
-			// RENDER SCREEN	
+			// RENDER SCREEN
 			
 			//Clear(olc::WHITE); // original position
 
 			vfCameraOffset = { (ScreenWidth() / tileSize.x) * 0.5f, (ScreenHeight() / tileSize.y) * 0.5f };
 
-			world.Render(this, &vfCameraOffset, &vfPlayerPos);
+			olc::vf2d mapPosition = { (vfPlayerPos * tileSize) - vfCameraOffset };
+
+			world.Render(this, &mapPosition);
 
 			player.Render(this, &vfCameraOffset);
 
