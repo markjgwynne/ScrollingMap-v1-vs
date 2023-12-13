@@ -33,8 +33,14 @@ namespace ScrollingMap
 				
 		float fMovementIncrement = 100.0f;
 
+		/*
+			Positions are based on a grid of tileSize x and y size blocks.
+			Positions are calculated from the grid positions and only converted to world space using tileSize on render.
+			Any assets or positions that are drived from the screen location need to be divided by the tileSize to obtain the grid position.
+		*/
+
 		olc::vf2d vfPlayerPos = { 10.0f, 10.0f };
-		olc::vf2d vfCameraOffset = { 0, 0 };
+		olc::vi2d viCameraOffset = { 0, 0 };
 		
 		olc::vi2d chunkCount = { 20, 20 };
 		olc::vi2d tileCount = { 8, 8 };
@@ -54,6 +60,7 @@ namespace ScrollingMap
 		bool OnUserUpdate(float fElapsedTime) override
 		{
 
+			// clear is placed here to ensure that any debugging information rendered during the update functions are still visible.
 			Clear(olc::WHITE);
 
 			// HANDLE MOVEMENT AND COLLISION DETECTION
@@ -63,16 +70,19 @@ namespace ScrollingMap
 			world.Update(this, &vfPlayerPos);
 
 			// RENDER SCREEN
+
+			// offset is used as the position of the player
+			// convert to int to ensure movement is tile by tile and not fractions of a tile.
+			viCameraOffset = { (int)((ScreenWidth() / tileSize.x) * 0.5f), (int)((ScreenHeight() / tileSize.y) * 0.5f) };
+
+			// take the vfPlayerPos from the cameraoffset (centre screen) to locate the world position that marks the start of the screen (0, 0)
+			// while doing this, convert to an integer vector to floor the numbers to the lowest round number. 
+			// This makes sure the movement is tile by tile and not fractions of a tile.
+			olc::vi2d viMapPosition = { viCameraOffset - vfPlayerPos };
 			
-			//Clear(olc::WHITE); // original position
+			world.Render(this, &viMapPosition);
 
-			vfCameraOffset = { (ScreenWidth() / tileSize.x) * 0.5f, (ScreenHeight() / tileSize.y) * 0.5f };
-
-			olc::vf2d mapPosition = { (vfPlayerPos * tileSize) - vfCameraOffset };
-
-			world.Render(this, &mapPosition);
-
-			player.Render(this, &vfCameraOffset);
+			player.Render(this, &viCameraOffset);
 
 			DrawString(1, 1, player.sPlayerLocation, olc::BLACK);
 			DrawString(1, 11, world.sChunkLocation, olc::BLACK);
