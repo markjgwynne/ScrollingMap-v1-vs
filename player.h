@@ -47,12 +47,19 @@ namespace ScrollingMap
 
 		}
 
-		void Render(olc::PixelGameEngine* pge) {
+		void Render(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
 
+			// original
 			//pge->FillRect(*vfPosition * *viTileSize, *viTileSize, olc::RED);
 			
 			// you get fractions of a position movement with button held using elapsed time. Change to integer to floor the number before multiplying by the tile size
-			pge->FillRect(olc::vi2d(*vfPosition) * *viTileSize, *viTileSize, olc::RED);
+			//pge->FillRect(olc::vi2d(*vfPosition) * *viTileSize, *viTileSize, olc::RED);
+			
+			pge->FillRect(*viCameraOffset * *viTileSize, *viTileSize, olc::RED);
+
+			//olc::vi2d position = { (int)std::floor(vfCameraOffset->x) * viTileSize->x ,(int)std::floor(vfCameraOffset->y) * viTileSize->y) };
+
+			//pge->FillRect(position.x, position.y, viTileSize->x, viTileSize->y, olc::RED);
 
 		}
 
