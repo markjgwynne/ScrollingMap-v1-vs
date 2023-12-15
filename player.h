@@ -13,16 +13,18 @@ namespace ScrollingMap
 	{
 	public:
 
-		olc::vf2d *vfPosition;
+		olc::vi2d *viPosition;
 		olc::vi2d *viTileSize;
+		olc::vi2d viNextPosition;
 
 		std::string sPlayerLocation;
 
 		int iMovementSpeed = 10;
 
-		Character(olc::vf2d *position, olc::vi2d *tileSize) {
+		Character(olc::vi2d *position, olc::vi2d *tileSize) {
 
-			vfPosition = position;
+			viPosition = position;
+			viNextPosition = *position;
 			viTileSize = tileSize;
 
 		}
@@ -31,19 +33,27 @@ namespace ScrollingMap
 			//delete viTileSize;
 		}
 
-		void Update(olc::PixelGameEngine* pge) {
+		olc::vi2d* GetNextPosition(olc::PixelGameEngine* pge) {
 
-			if (pge->GetKey(olc::Key::W).bPressed) vfPosition->y -= 1;
-			if (pge->GetKey(olc::Key::S).bPressed) vfPosition->y += 1;
-			if (pge->GetKey(olc::Key::A).bPressed) vfPosition->x -= 1;
-			if (pge->GetKey(olc::Key::D).bPressed) vfPosition->x += 1;
+			if (pge->GetKey(olc::Key::W).bPressed) viNextPosition.y -= 1;
+			if (pge->GetKey(olc::Key::S).bPressed) viNextPosition.y += 1;
+			if (pge->GetKey(olc::Key::A).bPressed) viNextPosition.x -= 1;
+			if (pge->GetKey(olc::Key::D).bPressed) viNextPosition.x += 1;
 
-			if (pge->GetKey(olc::Key::W).bHeld) vfPosition->y -= iMovementSpeed * pge->GetElapsedTime();
-			if (pge->GetKey(olc::Key::S).bHeld) vfPosition->y += iMovementSpeed * pge->GetElapsedTime();
-			if (pge->GetKey(olc::Key::A).bHeld) vfPosition->x -= iMovementSpeed * pge->GetElapsedTime();
-			if (pge->GetKey(olc::Key::D).bHeld) vfPosition->x += iMovementSpeed * pge->GetElapsedTime();
+			/*
+			if (pge->GetKey(olc::Key::W).bHeld) viNextPosition.y -= iMovementSpeed * pge->GetElapsedTime();
+			if (pge->GetKey(olc::Key::S).bHeld) viNextPosition.y += iMovementSpeed * pge->GetElapsedTime();
+			if (pge->GetKey(olc::Key::A).bHeld) viNextPosition.x -= iMovementSpeed * pge->GetElapsedTime();
+			if (pge->GetKey(olc::Key::D).bHeld) viNextPosition.x += iMovementSpeed * pge->GetElapsedTime();
+			*/
+			return &viNextPosition;
+			
+		}
 
-			sPlayerLocation = "Player position, x: " + std::to_string(vfPosition->x) + ", y: " + std::to_string(vfPosition->y);
+		void MovePosition() {
+
+			*viPosition = viNextPosition;
+			sPlayerLocation = "Player position, x: " + std::to_string(viPosition->x) + ", y: " + std::to_string(viPosition->y);
 
 		}
 

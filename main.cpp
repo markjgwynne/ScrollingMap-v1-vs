@@ -39,20 +39,21 @@ namespace ScrollingMap
 			Any assets or positions that are drived from the screen location need to be divided by the tileSize to obtain the grid position.
 		*/
 
-		olc::vf2d vfPlayerPos = { 10.0f, 10.0f };
+		olc::vi2d viPlayerPos = { 10, 10 };
 		olc::vi2d viCameraOffset = { 0, 0 };
 		
 		olc::vi2d chunkCount = { 20, 20 };
 		olc::vi2d tileCount = { 8, 8 };
 		olc::vi2d tileSize = { 16, 16 };
+		olc::vi2d renderDistance = { 1, 1 };
 
 		GameWorld world = GameWorld(&chunkCount, &tileCount, &tileSize);
-		Character player = Character(&vfPlayerPos, &tileSize);
+		Character player = Character(&viPlayerPos, &tileSize);
 
 		bool OnUserCreate() override
 		{
 
-			world.GenerateChunks(&vfPlayerPos);
+			world.GenerateChunks(&viPlayerPos);
 
 			return true;
 		}
@@ -65,9 +66,17 @@ namespace ScrollingMap
 
 			// HANDLE MOVEMENT AND COLLISION DETECTION
 			
-			player.Update(this);
+			/*
+			if (world.isCollision(player.GetNextPosition(this))) {
+				player.viNextPosition = viPlayerPos;
+			} else {
+				player.MovePosition();
+			};
+			*/
+			player.GetNextPosition(this);
+			player.MovePosition();;
 
-			world.Update(this, &vfPlayerPos);
+			world.Update(this, &viPlayerPos, &renderDistance);
 
 			// RENDER SCREEN
 
@@ -78,7 +87,7 @@ namespace ScrollingMap
 			// take the vfPlayerPos from the cameraoffset (centre screen) to locate the world position that marks the start of the screen (0, 0)
 			// while doing this, convert to an integer vector to floor the numbers to the lowest round number. 
 			// This makes sure the movement is tile by tile and not fractions of a tile.
-			olc::vi2d viMapPosition = { viCameraOffset - vfPlayerPos };
+			olc::vi2d viMapPosition = { viCameraOffset - viPlayerPos };
 			
 			world.Render(this, &viMapPosition);
 
@@ -86,6 +95,9 @@ namespace ScrollingMap
 
 			DrawString(1, 1, player.sPlayerLocation, olc::BLACK);
 			DrawString(1, 11, world.sChunkLocation, olc::BLACK);
+			DrawString(1, 21, world.sTileLocation, olc::BLACK);
+			DrawString(1, 31, world.sTileAwareness, olc::BLACK);
+			
 
 			return true;
 		}
