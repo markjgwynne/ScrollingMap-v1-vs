@@ -39,7 +39,7 @@ namespace ScrollingMap
 			Any assets or positions that are drived from the screen location need to be divided by the tileSize to obtain the grid position.
 		*/
 
-		olc::vi2d viPlayerPos = { 10, 10 };
+		olc::vi2d viPlayerPos = { 12, 12 };
 		olc::vi2d viCameraOffset = { 0, 0 };
 		
 		olc::vi2d chunkCount = { 20, 20 };
@@ -47,14 +47,12 @@ namespace ScrollingMap
 		olc::vi2d tileSize = { 16, 16 };
 		olc::vi2d renderDistance = { 1, 1 };
 
-		GameWorld world = GameWorld(&chunkCount, &tileCount, &tileSize);
+		GameWorld world = GameWorld(&chunkCount, &tileCount, &tileSize, &renderDistance);
 		Character player = Character(&viPlayerPos, &tileSize);
 
 		bool OnUserCreate() override
 		{
-
 			world.GenerateChunks(&viPlayerPos);
-
 			return true;
 		}
 
@@ -66,17 +64,12 @@ namespace ScrollingMap
 
 			// HANDLE MOVEMENT AND COLLISION DETECTION
 			
-			/*
-			if (world.isCollision(player.GetNextPosition(this))) {
-				player.viNextPosition = viPlayerPos;
-			} else {
-				player.MovePosition();
+			
+			if (world.UpdateOrReturnCollision(this, player.GetNextPosition(this)) == false) {
+				player.SetNextPosition();
 			};
-			*/
-			player.GetNextPosition(this);
-			player.MovePosition();;
-
-			world.Update(this, &viPlayerPos, &renderDistance);
+			
+			//world.Update(this, &viPlayerPos);
 
 			// RENDER SCREEN
 
@@ -98,7 +91,6 @@ namespace ScrollingMap
 			DrawString(1, 21, world.sTileLocation, olc::BLACK);
 			DrawString(1, 31, world.sTileAwareness, olc::BLACK);
 			
-
 			return true;
 		}
 	};
