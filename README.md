@@ -26,7 +26,11 @@ There also does not need to be a minimum space between forests. Forests can over
 The first version was built in stages and can be viewed in the following GitHub branches:
 
 **Branch:** 01-implement-world-object
-This 
+I created a new project in Visual Studio 2022. This was adapted from a previous half started project called CarRace that had been adapted to be a map scolling game. The name CarRace was partly kept through these first 3 branches.
+
+In this version the world class was created that allowed management of the generation and rendering of a world.
+
+
 
 
 **Branch:** 02-camera-position
