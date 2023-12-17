@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{1638e7fe-7e8f-487c-a623-01b550d192db}</ProjectGuid>
+    <ProjectGuid>{80ABFC67-D2B2-43FE-A4C7-DC0C2D3979AB}</ProjectGuid>
     <RootNamespace>CarRacev1vs</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>ScrollingMap-v1-vs</ProjectName>
