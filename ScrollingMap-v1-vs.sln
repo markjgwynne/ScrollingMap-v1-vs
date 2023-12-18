@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34309.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CarRace-v1-vs", "CarRace-v1-vs.vcxproj", "{1638E7FE-7E8F-487C-A623-01B550D192DB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScrollingMap-v1-vs", "ScrollingMap-v1-vs.vcxproj", "{80ABFC67-D2B2-43FE-A4C7-DC0C2D3979AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1638E7FE-7E8F-487C-A623-01B550D192DB}.Debug|x64.ActiveCfg = Debug|x64
-		{1638E7FE-7E8F-487C-A623-01B550D192DB}.Debug|x64.Build.0 = Debug|x64
-		{1638E7FE-7E8F-487C-A623-01B550D192DB}.Debug|x86.ActiveCfg = Debug|Win32
-		{1638E7FE-7E8F-487C-A623-01B550D192DB}.Debug|x86.Build.0 = Debug|Win32
-		{1638E7FE-7E8F-487C-A623-01B550D192DB}.Release|x64.ActiveCfg = Release|x64
-		{1638E7FE-7E8F-487C-A623-01B550D192DB}.Release|x64.Build.0 = Release|x64
-		{1638E7FE-7E8F-487C-A623-01B550D192DB}.Release|x86.ActiveCfg = Release|Win32
-		{1638E7FE-7E8F-487C-A623-01B550D192DB}.Release|x86.Build.0 = Release|Win32
+		{80ABFC67-D2B2-43FE-A4C7-DC0C2D3979AB}.Debug|x64.ActiveCfg = Debug|x64
+		{80ABFC67-D2B2-43FE-A4C7-DC0C2D3979AB}.Debug|x64.Build.0 = Debug|x64
+		{80ABFC67-D2B2-43FE-A4C7-DC0C2D3979AB}.Debug|x86.ActiveCfg = Debug|Win32
+		{80ABFC67-D2B2-43FE-A4C7-DC0C2D3979AB}.Debug|x86.Build.0 = Debug|Win32
+		{80ABFC67-D2B2-43FE-A4C7-DC0C2D3979AB}.Release|x64.ActiveCfg = Release|x64
+		{80ABFC67-D2B2-43FE-A4C7-DC0C2D3979AB}.Release|x64.Build.0 = Release|x64
+		{80ABFC67-D2B2-43FE-A4C7-DC0C2D3979AB}.Release|x86.ActiveCfg = Release|Win32
+		{80ABFC67-D2B2-43FE-A4C7-DC0C2D3979AB}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
