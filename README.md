@@ -28,15 +28,18 @@ The first version was built in stages and can be viewed in the following GitHub 
 **Branch:** 01-implement-world-object
 I created a new project in Visual Studio 2022. This was adapted from a previous half started project called CarRace that had been adapted to be a map scolling game. The name CarRace was partly kept through these first 3 branches.
 
-In this version the world class was created that allowed management of the generation and rendering of a world.
+In this version a world object class was created that allowed management of the generation and rendering of the world.
 
+The world generation is set by passing the world chunk and tile dimensions to the world object.
 
-
+Only grass and trees are rendered in this version. The grass is light green and the trees are dark green.
 
 **Branch:** 02-camera-position
 
+In this branch we needed to add camera location on top of the world coordinates. 
 
 **Branch:** 03-render-distance-and-collision
 
+This branch added the adjustment of render distance with variables in the main function. 
 
-
+Collision detection was added to detect impact with trees.
