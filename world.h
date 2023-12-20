@@ -132,6 +132,9 @@ namespace ScrollingMap
 
 			std::vector<std::unique_ptr<chunk>> vChunk;
 
+			std::vector<olc::Sprite*> chunkSprite;
+			olc::Sprite* sprBackground = nullptr;
+
 			GameWorld(olc::vi2d* chunkCount, olc::vi2d* tileCount, olc::vi2d* tileSize, olc::vi2d* renderDistance) {
 				viChunkCount = chunkCount;
 				viChunkTileCount = tileCount;
@@ -173,7 +176,7 @@ namespace ScrollingMap
 
 			}
 			
-			void GenerateChunks(olc::vi2d* vfChunkPosition)
+			void GenerateChunks(olc::PixelGameEngine* pge, olc::vi2d* vfChunkPosition)
 			{
 				for (int y = 0; y < viChunkCount->y; y++) {
 					for (int x = 0; x < viChunkCount->x; x++) {				
@@ -181,6 +184,8 @@ namespace ScrollingMap
 							viChunkTileCount, viTileSize));
 					}
 				}
+
+				GenerateSprite(pge);
 
 			}
 
@@ -243,6 +248,7 @@ namespace ScrollingMap
 
 			void Render(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
 
+				/*
 				int index = 0;
 				for (auto& chunk : vChunk) // access by reference to avoid copying
 				{
@@ -253,6 +259,8 @@ namespace ScrollingMap
 					}
 					index += 1;
 				}
+				*/
+				pge->DrawPartialSprite({ 0, 0 }, sprBackground, *viCameraOffset * *viTileSize, { pge->ScreenWidth(), pge->ScreenHeight() });
 			
 			}
 
@@ -282,6 +290,28 @@ namespace ScrollingMap
 				iTileIndex = tileIndex;
 				sTileLocation = "Tile index: " + std::to_string(iTileIndex) + " of " + std::to_string(vChunk[iChunkIndex]->vTiles.size());
 				sTileAwareness = "Tile Type: " + tileTypeName[vChunk[iChunkIndex]->vTiles[iTileIndex]->eTileType];
+			}
+
+			void GenerateSprite(olc::PixelGameEngine* pge) {
+
+				sprBackground = new olc::Sprite(viChunkCount->x * viChunkTileCount->x * viTileSize->x, viChunkCount->x * viChunkTileCount->x * viTileSize->x);
+				
+				// Don't foregt to set the draw target back to being the main screen (been there... wasted 1.5 hours :| )
+				pge->SetDrawTarget(sprBackground);
+
+				olc::vi2d offset = { 0, 0 };
+
+				for (auto& chunk : vChunk) // access by reference to avoid copying
+				{
+					if (chunk->bRenderChunk) {
+						chunk->Render(pge, &offset);
+					}
+				}
+
+				chunkSprite.push_back(sprBackground);
+
+				// Don't foregt to set the draw target back to being the main screen (been there... wasted 1.5 hours :| )
+				pge->SetDrawTarget(nullptr);
 			}
 
 
