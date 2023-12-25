@@ -36,22 +36,6 @@ namespace ScrollingMap
 			//delete viTileSize;
 		}
 
-		void SetupCharacter(olc::PixelGameEngine* pge) {
-
-			playerSprite = new olc::Sprite(viTileSize->x, viTileSize->y);
-
-			pge->SetDrawTarget(playerSprite);
-
-			pge->FillRect({ 0, 0 }, *viTileSize, olc::RED);
-
-			pge->FillRect({ 0, 0 }, *viTileSize, olc::RED);
-
-			playerDecal = new olc::Decal(playerSprite);
-
-			pge->SetDrawTarget(nullptr);
-
-		}
-
 		olc::vi2d* GetNextPosition(olc::PixelGameEngine* pge) {
 
 			viNextPosition = *viPosition;
@@ -78,11 +62,31 @@ namespace ScrollingMap
 
 		void Render(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
 
-			//pge->FillRect(*viCameraOffset * *viTileSize, *viTileSize, olc::RED);
-					
-			pge->DrawDecal(*viCameraOffset * *viTileSize, playerDecal);
+			pge->FillRect(*viCameraOffset * *viTileSize, *viTileSize, olc::RED);
 
 		}
+
+		void GenerateSprite(olc::PixelGameEngine* pge) {
+
+			playerSprite = new olc::Sprite(viTileSize->x, viTileSize->y);
+
+			pge->SetDrawTarget(playerSprite);
+
+			pge->FillRect({ 0, 0 }, *viTileSize, olc::RED);
+
+			pge->FillRect({ 0, 0 }, *viTileSize, olc::RED);
+
+			playerDecal = new olc::Decal(playerSprite);
+
+			pge->SetDrawTarget(nullptr);
+
+		}
+
+		void RenderSprite(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
+
+			pge->DrawDecal(*viCameraOffset * *viTileSize, playerDecal);
+
+		}	
 
 	};
 }

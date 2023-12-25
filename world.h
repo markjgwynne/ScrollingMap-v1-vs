@@ -187,8 +187,6 @@ namespace ScrollingMap
 					}
 				}
 
-				GenerateSprite(pge);
-
 			}
 
 			bool IsCollision(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition) {
@@ -216,9 +214,7 @@ namespace ScrollingMap
 
 			void Render(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
 
-
 				// pixel rendering
-				/*
 				int index = 0;
 				for (auto& chunk : vChunk) // access by reference to avoid copying
 				{
@@ -229,14 +225,40 @@ namespace ScrollingMap
 					}
 					index += 1;
 				}
-				*/
+
+			}
+
+			void GenerateSprite(olc::PixelGameEngine* pge) {
+
+				olc::Sprite* sprBackground = new olc::Sprite(viChunkCount->x * viChunkTileCount->x * viTileSize->x, viChunkCount->x * viChunkTileCount->x * viTileSize->x);
+
+				pge->SetDrawTarget(sprBackground);
+
+				olc::vi2d offset = { 0, 0 };
+
+				for (auto& chunk : vChunk) // access by reference to avoid copying
+				{
+					chunk->Render(pge, &offset);
+				}
+
+				chunkSprite.push_back(sprBackground);
+
+				olc::Decal* decBackground = new olc::Decal(sprBackground);
+
+				chunkDecal.push_back(decBackground);
+
+				// Don't foregt to set the draw target back to being the main screen (been there... wasted 1.5 hours :| )
+				pge->SetDrawTarget(nullptr);
+			}
+
+			void RenderSprite(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
 
 				// sprite/decal rendering
 
 				pge->DrawPartialDecal({ 0.0f, 0.0f }, chunkDecal[0], *viCameraOffset * *viTileSize, { (float)pge->ScreenWidth(), (float)pge->ScreenHeight() });
-				
+
 				sSpriteRenderLocation = "Sprite render location, x:" + std::to_string(viCameraOffset->x * viTileSize->x) + " | y: " + std::to_string(viCameraOffset->y * viTileSize->y);
-			
+
 			}
 
 		private:
@@ -265,29 +287,6 @@ namespace ScrollingMap
 				iTileIndex = tileIndex;
 				sTileLocation = "Tile index: " + std::to_string(iTileIndex) + " of " + std::to_string(vChunk[iChunkIndex]->vTiles.size());
 				sTileAwareness = "Tile Type: " + tileTypeName[vChunk[iChunkIndex]->vTiles[iTileIndex]->eTileType];
-			}
-
-			void GenerateSprite(olc::PixelGameEngine* pge) {
-
-				olc::Sprite* sprBackground = new olc::Sprite(viChunkCount->x * viChunkTileCount->x * viTileSize->x, viChunkCount->x * viChunkTileCount->x * viTileSize->x);
-				
-				pge->SetDrawTarget(sprBackground);
-
-				olc::vi2d offset = { 0, 0 };
-
-				for (auto& chunk : vChunk) // access by reference to avoid copying
-				{
-					chunk->Render(pge, &offset);
-				}
-
-				chunkSprite.push_back(sprBackground);
-				
-				olc::Decal* decBackground = new olc::Decal(sprBackground);
-				
-				chunkDecal.push_back(decBackground);
-				
-				// Don't foregt to set the draw target back to being the main screen (been there... wasted 1.5 hours :| )
-				pge->SetDrawTarget(nullptr);
 			}
 
     };

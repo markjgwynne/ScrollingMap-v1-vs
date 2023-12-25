@@ -47,6 +47,8 @@ namespace ScrollingMap
 		olc::vi2d tileSize = { 16, 16 };
 		olc::vi2d renderDistance = { 1, 1 };
 
+		bool useSprites = true;
+
 		GameWorld world = GameWorld(&chunkCount, &tileCount, &tileSize, &renderDistance);
 		Character player = Character(&viPlayerPos, &tileSize);
 
@@ -56,8 +58,10 @@ namespace ScrollingMap
 		{
 			world.GenerateChunks(this , &viPlayerPos);
 
-			player.SetupCharacter(this);
-
+			if (useSprites) {
+				player.GenerateSprite(this);
+				world.GenerateSprite(this);
+			}
 			return true;
 		}
 
@@ -69,7 +73,7 @@ namespace ScrollingMap
 
 			// HANDLE MOVEMENT AND COLLISION DETECTION
 			
-			if (world.UpdateOrIsCollision(this, player.GetNextPosition(this)) == false) {
+			if (world.IsCollision(this, player.GetNextPosition(this)) == false) {
 				player.SetNextPosition();
 			};
 			
@@ -80,15 +84,20 @@ namespace ScrollingMap
 			viCameraOffset = { (int)((ScreenWidth() / tileSize.x) * 0.5f), (int)((ScreenHeight() / tileSize.y) * 0.5f) };
 
 			// take the vfPlayerPos from the cameraoffset (centre screen) to locate the world position that marks the start of the screen (0, 0)
-			// while doing this, convert to an integer vector to floor the numbers to the lowest round number. 
+			// while doing this, convert to an integer vector to floor the numbers to the lowest round number.
 			// This makes sure the movement is tile by tile and not fractions of a tile.
 			
-			//olc::vi2d viMapPosition = { viCameraOffset - viPlayerPos }; // pixel rendering version
-			olc::vi2d viMapPosition = { viPlayerPos - viCameraOffset }; // sprite rendering version
+			olc::vi2d viMapPosition;
 
-			world.Render(this, &viMapPosition);
-
-			player.Render(this, &viCameraOffset);
+			if (useSprites) {
+				viMapPosition = { viPlayerPos - viCameraOffset }; // sprite rendering version
+				world.RenderSprite(this, &viMapPosition);
+				player.RenderSprite(this, &viCameraOffset);
+			} else {
+				viMapPosition = { viCameraOffset - viPlayerPos }; // pixel rendering version
+				world.Render(this, &viMapPosition);
+				player.Render(this, &viCameraOffset);
+			}
 
 			DrawString(1, 1, player.sPlayerLocation, olc::WHITE);
 			DrawString(1, 11, world.sSpriteRenderLocation, olc::WHITE);
