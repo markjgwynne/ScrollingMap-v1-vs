@@ -126,7 +126,7 @@ namespace ScrollingMap
 			olc::vi2d* viTileSize;
 			olc::vi2d* viRenderDistance;
 
-			int iChunkIndex, iTileIndex;
+			int iChunkIndex, iTileIndex, iChunkX, iChunkY;
 
 			std::string sChunkLocation, sTileLocation, sSpriteRenderLocation, sTileAwareness;
 
@@ -189,26 +189,14 @@ namespace ScrollingMap
 
 			}
 
-			bool IsCollision(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition) {
-				//x * chunkCountWidth + y;
+			bool UpdatePlayerPosition(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition) {
 
-				int chunkX = std::floor((viNextPosition->x / viChunkTileCount->x));
-				int chunkY = std::floor((viNextPosition->y / viChunkTileCount->y));
-				int chunkIndex = chunkY * viChunkCount->y + chunkX;
-
-				int tileX = std::fmodf(viNextPosition->x, (float)viChunkTileCount->x);
-				int tileY = std::fmodf(viNextPosition->y, (float)viChunkTileCount->y);
-				int tileIndex = (tileY * viChunkTileCount->y + tileX);
-
-				if (vChunk[chunkIndex]->vTiles[tileIndex]->eTileType == Tree) {
-					// collision. update nothing, return true;
+				if (IsCollision(pge, viNextPosition) == false) {
+					MovePlayer();
 					return true;
-				}
-				else {
-					// no collision, continue rendering normal movement
-					UpdatePlayerPosition(chunkIndex, tileIndex, chunkX, chunkY);
-					return false;
-				}
+				};
+
+				return false;
 
 			}
 
@@ -263,7 +251,35 @@ namespace ScrollingMap
 
 		private:
 
-			void UpdatePlayerPosition(int chunkIndex, int tileIndex, int chunkX, int chunkY) {
+			bool IsCollision(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition) {
+				//x * chunkCountWidth + y;
+
+				int chunkX = std::floor((viNextPosition->x / viChunkTileCount->x));
+				int chunkY = std::floor((viNextPosition->y / viChunkTileCount->y));
+				int chunkIndex = chunkY * viChunkCount->y + chunkX;
+
+				int tileX = std::fmodf(viNextPosition->x, (float)viChunkTileCount->x);
+				int tileY = std::fmodf(viNextPosition->y, (float)viChunkTileCount->y);
+				int tileIndex = (tileY * viChunkTileCount->y + tileX);
+
+				if (vChunk[chunkIndex]->vTiles[tileIndex]->eTileType == Tree) {
+					// collision. update nothing, return true;
+					return true;
+				}
+				else {
+					// no collision, continue rendering normal movement
+					// save the positions for use when determining world position
+					iChunkIndex = chunkIndex;
+					iTileIndex = tileIndex;
+					iChunkX = chunkX;
+					iChunkY = chunkY;
+					
+					return false;
+				}
+
+			}
+
+			void MovePlayer() {
 				
 				for (int y = 0; y < viChunkCount->y; y++) {
 					for (int x = 0; x < viChunkCount->x; x++) {
@@ -273,18 +289,16 @@ namespace ScrollingMap
 						vChunk[i]->bPlayerInChunk = false;
 						vChunk[i]->bRenderChunk = false;
 
-						if (x >= chunkX - viRenderDistance->x && x <= chunkX + viRenderDistance->x &&
-							y >= chunkY - viRenderDistance->y && y <= chunkY + viRenderDistance->y) {
+						if (x >= iChunkX - viRenderDistance->x && x <= iChunkX + viRenderDistance->x &&
+							y >= iChunkY - viRenderDistance->y && y <= iChunkY + viRenderDistance->y) {
 							vChunk[i]->bRenderChunk = true;
 						}
 					}
 				}
 
-				iChunkIndex = chunkIndex;
 				vChunk[iChunkIndex]->bPlayerInChunk = true;
 				sChunkLocation = "Chunk index: " + std::to_string(iChunkIndex) + " of " + std::to_string(vChunk.size());
 
-				iTileIndex = tileIndex;
 				sTileLocation = "Tile index: " + std::to_string(iTileIndex) + " of " + std::to_string(vChunk[iChunkIndex]->vTiles.size());
 				sTileAwareness = "Tile Type: " + tileTypeName[vChunk[iChunkIndex]->vTiles[iTileIndex]->eTileType];
 			}
