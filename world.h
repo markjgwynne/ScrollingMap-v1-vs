@@ -128,9 +128,12 @@ namespace ScrollingMap
 
 			int iChunkIndex, iTileIndex;
 
-			std::string sChunkLocation, sTileLocation, sTileAwareness;
+			std::string sChunkLocation, sTileLocation, sSpriteRenderLocation, sTileAwareness;
 
 			std::vector<std::unique_ptr<chunk>> vChunk;
+
+			std::vector<olc::Sprite*> chunkSprite;
+			std::vector<olc::Decal*> chunkDecal;
 
 			GameWorld(olc::vi2d* chunkCount, olc::vi2d* tileCount, olc::vi2d* tileSize, olc::vi2d* renderDistance) {
 				viChunkCount = chunkCount;
@@ -158,6 +161,8 @@ namespace ScrollingMap
 
 			void GenerateWorld(int worldSeed) {
 
+				//doesnt currently do anything.
+
 				seed = worldSeed;
 
 				// Create a random number generator and seed it with a fixed value
@@ -173,7 +178,7 @@ namespace ScrollingMap
 
 			}
 			
-			void GenerateChunks(olc::vi2d* vfChunkPosition)
+			void GenerateChunks(olc::PixelGameEngine* pge, olc::vi2d* vfChunkPosition)
 			{
 				for (int y = 0; y < viChunkCount->y; y++) {
 					for (int x = 0; x < viChunkCount->x; x++) {				
@@ -184,7 +189,7 @@ namespace ScrollingMap
 
 			}
 
-			bool UpdateOrReturnCollision(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition) {
+			bool IsCollision(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition) {
 				//x * chunkCountWidth + y;
 
 				int chunkX = std::floor((viNextPosition->x / viChunkTileCount->x));
@@ -207,42 +212,9 @@ namespace ScrollingMap
 
 			}
 
-			void Update(olc::PixelGameEngine* pge, olc::vi2d* viPlayerPosition) {
-				//x * chunkCountWidth + y;
-
-				int chunkX = std::floor((viPlayerPosition->x / viChunkTileCount->x));
-				int chunkY = std::floor((viPlayerPosition->y / viChunkTileCount->y));
-				
-				for (int y = 0; y < viChunkCount->y; y++) {
-					for (int x = 0; x < viChunkCount->x; x++) {
-
-						int i = y * viChunkCount->y + x;
-
-						vChunk[i]->bPlayerInChunk = false;
-						vChunk[i]->bRenderChunk = false;
-						
-						if (x >= chunkX - viRenderDistance->x && x <= chunkX + viRenderDistance->x &&
-							y >= chunkY - viRenderDistance->y && y <= chunkY + viRenderDistance->y) {
-							vChunk[i]->bRenderChunk = true;
-						}
-					}
-				}
-				
-				iChunkIndex = chunkY * viChunkCount->y + chunkX;
-				vChunk[iChunkIndex]->bPlayerInChunk = true;
-				sChunkLocation = "Chunk index: " + std::to_string(iChunkIndex) + " of " + std::to_string(vChunk.size());
-
-				int tileX = std::fmodf(viPlayerPosition->x, (float)viChunkTileCount->x);
-				int tileY = std::fmodf(viPlayerPosition->y, (float)viChunkTileCount->y);
-
-				iTileIndex = (tileY * viChunkTileCount->y + tileX);
-				sTileLocation = "Tile index: " + std::to_string(iTileIndex) + " of " + std::to_string(vChunk[iChunkIndex]->vTiles.size());
-				sTileAwareness = "Tile Type: " + tileTypeName[vChunk[iChunkIndex]->vTiles[iTileIndex]->eTileType];
-
-			}
-
 			void Render(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
 
+				// pixel rendering
 				int index = 0;
 				for (auto& chunk : vChunk) // access by reference to avoid copying
 				{
@@ -253,7 +225,40 @@ namespace ScrollingMap
 					}
 					index += 1;
 				}
-			
+
+			}
+
+			void GenerateSprite(olc::PixelGameEngine* pge) {
+
+				olc::Sprite* sprBackground = new olc::Sprite(viChunkCount->x * viChunkTileCount->x * viTileSize->x, viChunkCount->x * viChunkTileCount->x * viTileSize->x);
+
+				pge->SetDrawTarget(sprBackground);
+
+				olc::vi2d offset = { 0, 0 };
+
+				for (auto& chunk : vChunk) // access by reference to avoid copying
+				{
+					chunk->Render(pge, &offset);
+				}
+
+				chunkSprite.push_back(sprBackground);
+
+				olc::Decal* decBackground = new olc::Decal(sprBackground);
+
+				chunkDecal.push_back(decBackground);
+
+				// Don't foregt to set the draw target back to being the main screen (been there... wasted 1.5 hours :| )
+				pge->SetDrawTarget(nullptr);
+			}
+
+			void RenderSprite(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
+
+				// sprite/decal rendering
+
+				pge->DrawPartialDecal({ 0.0f, 0.0f }, chunkDecal[0], *viCameraOffset * *viTileSize, { (float)pge->ScreenWidth(), (float)pge->ScreenHeight() });
+
+				sSpriteRenderLocation = "Sprite render location, x:" + std::to_string(viCameraOffset->x * viTileSize->x) + " | y: " + std::to_string(viCameraOffset->y * viTileSize->y);
+
 			}
 
 		private:
@@ -283,7 +288,6 @@ namespace ScrollingMap
 				sTileLocation = "Tile index: " + std::to_string(iTileIndex) + " of " + std::to_string(vChunk[iChunkIndex]->vTiles.size());
 				sTileAwareness = "Tile Type: " + tileTypeName[vChunk[iChunkIndex]->vTiles[iTileIndex]->eTileType];
 			}
-
 
     };
 }

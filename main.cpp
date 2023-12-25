@@ -39,7 +39,7 @@ namespace ScrollingMap
 			Any assets or positions that are drived from the screen location need to be divided by the tileSize to obtain the grid position.
 		*/
 
-		olc::vi2d viPlayerPos = { 12, 12 };
+		olc::vi2d viPlayerPos = { 101, 101 };
 		olc::vi2d viCameraOffset = { 0, 0 };
 		
 		olc::vi2d chunkCount = { 20, 20 };
@@ -47,12 +47,21 @@ namespace ScrollingMap
 		olc::vi2d tileSize = { 16, 16 };
 		olc::vi2d renderDistance = { 1, 1 };
 
+		bool useSprites = true;
+
 		GameWorld world = GameWorld(&chunkCount, &tileCount, &tileSize, &renderDistance);
 		Character player = Character(&viPlayerPos, &tileSize);
 
+		olc::Sprite* sprTest = nullptr;
+
 		bool OnUserCreate() override
 		{
-			world.GenerateChunks(&viPlayerPos);
+			world.GenerateChunks(this , &viPlayerPos);
+
+			if (useSprites) {
+				player.GenerateSprite(this);
+				world.GenerateSprite(this);
+			}
 			return true;
 		}
 
@@ -64,13 +73,10 @@ namespace ScrollingMap
 
 			// HANDLE MOVEMENT AND COLLISION DETECTION
 			
-			
-			if (world.UpdateOrReturnCollision(this, player.GetNextPosition(this)) == false) {
+			if (world.IsCollision(this, player.GetNextPosition(this)) == false) {
 				player.SetNextPosition();
 			};
 			
-			//world.Update(this, &viPlayerPos);
-
 			// RENDER SCREEN
 
 			// offset is used as the position of the player
@@ -78,18 +84,26 @@ namespace ScrollingMap
 			viCameraOffset = { (int)((ScreenWidth() / tileSize.x) * 0.5f), (int)((ScreenHeight() / tileSize.y) * 0.5f) };
 
 			// take the vfPlayerPos from the cameraoffset (centre screen) to locate the world position that marks the start of the screen (0, 0)
-			// while doing this, convert to an integer vector to floor the numbers to the lowest round number. 
+			// while doing this, convert to an integer vector to floor the numbers to the lowest round number.
 			// This makes sure the movement is tile by tile and not fractions of a tile.
-			olc::vi2d viMapPosition = { viCameraOffset - viPlayerPos };
 			
-			world.Render(this, &viMapPosition);
+			olc::vi2d viMapPosition;
 
-			player.Render(this, &viCameraOffset);
+			if (useSprites) {
+				viMapPosition = { viPlayerPos - viCameraOffset }; // sprite rendering version
+				world.RenderSprite(this, &viMapPosition);
+				player.RenderSprite(this, &viCameraOffset);
+			} else {
+				viMapPosition = { viCameraOffset - viPlayerPos }; // pixel rendering version
+				world.Render(this, &viMapPosition);
+				player.Render(this, &viCameraOffset);
+			}
 
-			DrawString(1, 1, player.sPlayerLocation, olc::BLACK);
-			DrawString(1, 11, world.sChunkLocation, olc::BLACK);
-			DrawString(1, 21, world.sTileLocation, olc::BLACK);
-			DrawString(1, 31, world.sTileAwareness, olc::BLACK);
+			DrawString(1, 1, player.sPlayerLocation, olc::WHITE);
+			DrawString(1, 11, world.sSpriteRenderLocation, olc::WHITE);
+			DrawString(1, 21, world.sChunkLocation, olc::WHITE);
+			DrawString(1, 31, world.sTileLocation, olc::WHITE);
+			DrawString(1, 41, world.sTileAwareness, olc::WHITE);
 			
 			return true;
 		}
