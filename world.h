@@ -132,11 +132,6 @@ namespace ScrollingMap
 
 			std::vector<std::unique_ptr<chunk>> vChunk;
 
-			/*
-			std::unique_ptr<olc::Sprite> spr;
-			std::unique_ptr<olc::Decal> dec;
-			*/
-
 			std::vector<olc::Sprite*> chunkSprite;
 			std::vector<olc::Decal*> chunkDecal;
 
