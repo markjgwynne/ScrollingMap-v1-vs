@@ -56,6 +56,8 @@ namespace ScrollingMap
 		{
 			world.GenerateChunks(this , &viPlayerPos);
 
+			player.SetupCharacter(this);
+
 			return true;
 		}
 

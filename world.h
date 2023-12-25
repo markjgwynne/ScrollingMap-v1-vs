@@ -166,6 +166,8 @@ namespace ScrollingMap
 
 			void GenerateWorld(int worldSeed) {
 
+				//doesnt currently do anything.
+
 				seed = worldSeed;
 
 				// Create a random number generator and seed it with a fixed value
@@ -217,40 +219,6 @@ namespace ScrollingMap
 
 			}
 
-			void Update(olc::PixelGameEngine* pge, olc::vi2d* viPlayerPosition) {
-				//x * chunkCountWidth + y;
-
-				int chunkX = std::floor((viPlayerPosition->x / viChunkTileCount->x));
-				int chunkY = std::floor((viPlayerPosition->y / viChunkTileCount->y));
-				
-				for (int y = 0; y < viChunkCount->y; y++) {
-					for (int x = 0; x < viChunkCount->x; x++) {
-
-						int i = y * viChunkCount->y + x;
-
-						vChunk[i]->bPlayerInChunk = false;
-						vChunk[i]->bRenderChunk = false;
-						
-						if (x >= chunkX - viRenderDistance->x && x <= chunkX + viRenderDistance->x &&
-							y >= chunkY - viRenderDistance->y && y <= chunkY + viRenderDistance->y) {
-							vChunk[i]->bRenderChunk = true;
-						}
-					}
-				}
-				
-				iChunkIndex = chunkY * viChunkCount->y + chunkX;
-				vChunk[iChunkIndex]->bPlayerInChunk = true;
-				sChunkLocation = "Chunk index: " + std::to_string(iChunkIndex) + " of " + std::to_string(vChunk.size());
-
-				int tileX = std::fmodf(viPlayerPosition->x, (float)viChunkTileCount->x);
-				int tileY = std::fmodf(viPlayerPosition->y, (float)viChunkTileCount->y);
-
-				iTileIndex = (tileY * viChunkTileCount->y + tileX);
-				sTileLocation = "Tile index: " + std::to_string(iTileIndex) + " of " + std::to_string(vChunk[iChunkIndex]->vTiles.size());
-				sTileAwareness = "Tile type: " + tileTypeName[vChunk[iChunkIndex]->vTiles[iTileIndex]->eTileType];
-
-			}
-
 			void Render(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
 
 
@@ -268,9 +236,7 @@ namespace ScrollingMap
 				}
 				*/
 
-				// sprite rendering
-
-				//pge->DrawPartialSprite({ 0, 0 }, chunkSprite[0], *viCameraOffset * *viTileSize, {pge->ScreenWidth(), pge->ScreenHeight()});
+				// sprite/decal rendering
 
 				pge->DrawPartialDecal({ 0.0f, 0.0f }, chunkDecal[0], *viCameraOffset * *viTileSize, { (float)pge->ScreenWidth(), (float)pge->ScreenHeight() });
 				
@@ -328,7 +294,6 @@ namespace ScrollingMap
 				// Don't foregt to set the draw target back to being the main screen (been there... wasted 1.5 hours :| )
 				pge->SetDrawTarget(nullptr);
 			}
-
 
     };
 }

@@ -21,6 +21,9 @@ namespace ScrollingMap
 
 		int iMovementSpeed = 10;
 
+		olc::Sprite* playerSprite = nullptr;
+		olc::Decal* playerDecal = nullptr;
+
 		Character(olc::vi2d *position, olc::vi2d *tileSize) {
 
 			viPosition = position;
@@ -31,6 +34,20 @@ namespace ScrollingMap
 		~Character() {
 			//delete vfPosition;
 			//delete viTileSize;
+		}
+
+		void SetupCharacter(olc::PixelGameEngine* pge) {
+
+			playerSprite = new olc::Sprite(viTileSize->x, viTileSize->y);
+
+			pge->SetDrawTarget(playerSprite);
+
+			pge->FillRect({ 0, 0 }, *viTileSize, olc::RED);
+
+			playerDecal = new olc::Decal(playerSprite);
+
+			pge->SetDrawTarget(nullptr);
+
 		}
 
 		olc::vi2d* GetNextPosition(olc::PixelGameEngine* pge) {
@@ -58,8 +75,10 @@ namespace ScrollingMap
 		}
 
 		void Render(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
+
+			//pge->FillRect(*viCameraOffset * *viTileSize, *viTileSize, olc::RED);
 					
-			pge->FillRect(*viCameraOffset * *viTileSize, *viTileSize, olc::RED);
+			pge->DrawDecal(*viCameraOffset * *viTileSize, playerDecal);
 
 		}
 
