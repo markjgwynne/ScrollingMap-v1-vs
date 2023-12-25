@@ -196,7 +196,7 @@ namespace ScrollingMap
 
 			}
 
-			bool UpdateOrIsCollision(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition) {
+			bool IsCollision(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition) {
 				//x * chunkCountWidth + y;
 
 				int chunkX = std::floor((viNextPosition->x / viChunkTileCount->x));

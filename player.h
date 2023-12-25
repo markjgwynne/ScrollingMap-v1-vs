@@ -44,6 +44,8 @@ namespace ScrollingMap
 
 			pge->FillRect({ 0, 0 }, *viTileSize, olc::RED);
 
+			pge->FillRect({ 0, 0 }, *viTileSize, olc::RED);
+
 			playerDecal = new olc::Decal(playerSprite);
 
 			pge->SetDrawTarget(nullptr);
