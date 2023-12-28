@@ -33,38 +33,36 @@ namespace ScrollingMap
 		olc::vi2d *viTileSize;
 		tiletype eTileType;
 
+		tile() {};
+
 		tile(olc::vi2d position, olc::vi2d* tileSize) {
+			
+			SetPosition(position, tileSize);
+		}
+
+		~tile() {
+			
+		}
+
+		void SetPosition(olc::vi2d position, olc::vi2d* tileSize) {
 			viPosition = position;
 			viTileSize = tileSize;
 			eTileType = Grass;
 
 			AddLayerTrees();
-		};
-
-		~tile() {
-			//delete viTileSize;
-		};
+		}
 
 		void AddLayerTrees() {
 
 			if (rand() % 6 == 0) eTileType = Tree;
 
-		};
+		}
 
 		void Render(olc::PixelGameEngine* pge, olc::vi2d* viOffset) {
 
-			// original
 			pge->FillRect((viPosition + *viOffset) * *viTileSize, olc::vi2d(viTileSize->x, viTileSize->y), tileMap[eTileType]);
 
-			//vfCameraOffset -= vfPlayerPos;
-
-			//olc::vi2d vfWorldSpace = vfPosition  - (*vfPlayerPos - *vfCameraOffset);
-
-			//pge->FillRect(vfWorldSpace * *viTileSize, olc::vi2d(viTileSize->x, viTileSize->y), tileMap[eTileType]);
-
-			//pge->FillRect(vfPosition + *vfOffset, olc::vi2d(viTileSize->x, viTileSize->y), tileMap[eTileType]);
-
-		};
+		}
 
 	};
 
@@ -78,7 +76,7 @@ namespace ScrollingMap
 		bool bRenderChunk;
 
 		std::vector<std::unique_ptr<tile>> vTiles;
-
+		
 		chunk(olc::vi2d position, olc::vi2d* tileCount, olc::vi2d* tileSize) {
 			
 			viPosition = position;
@@ -87,13 +85,12 @@ namespace ScrollingMap
 
 			bPlayerInChunk = false;
 			bRenderChunk = false;
-
+			
 			GenerateTiles();
 		}
 
 		~chunk() {
-			//delete viChunkTileCount;
-			//delete viTileSize;
+			
 		}
 
 		void GenerateTiles()
@@ -207,9 +204,9 @@ namespace ScrollingMap
 				for (auto& chunk : vChunk) // access by reference to avoid copying
 				{
 					if (chunk->bRenderChunk) {
-					chunk->Render(pge, viCameraOffset);
-					// render the chunk index in the top left corner for debugging
-					//pge->DrawString((chunk->viPosition + *viCameraOffset) * *viTileSize, std::to_string(index), olc::BLACK);
+						chunk->Render(pge, viCameraOffset);
+						// render the chunk index in the top left corner for debugging
+						//pge->DrawString((chunk->viPosition + *viCameraOffset) * *viTileSize, std::to_string(index), olc::BLACK);
 					}
 					index += 1;
 				}
