@@ -39,10 +39,10 @@ namespace ScrollingMap
 			Any assets or positions that are drived from the screen location need to be divided by the tileSize to obtain the grid position.
 		*/
 
-		olc::vi2d viPlayerPos = { 101, 101 };
+		olc::vi2d viPlayerPos = { 10, 10 };
 		olc::vi2d viCameraOffset = { 0, 0 };
 		
-		olc::vi2d chunkCount = { 20, 20 };
+		olc::vi2d chunkCount = { 4, 4 };
 		olc::vi2d tileCount = { 16, 16 };
 		olc::vi2d tileSize = { 16, 16 };
 		olc::vi2d renderDistance = { 1, 1 };
@@ -56,7 +56,7 @@ namespace ScrollingMap
 
 		bool OnUserCreate() override
 		{
-			world.GenerateChunks(this , &viPlayerPos);
+			world.GenerateWorld(123, &viPlayerPos);
 
 			if (useSprites) {
 				player.GenerateSprite(this);

@@ -23,9 +23,20 @@ namespace ScrollingMap
 	};
 
 	std::map<tiletype, olc::Pixel> tileMap;
-
 	std::map<tiletype, std::string> tileTypeName;
 	
+	struct ChunkIndexes
+	{
+		olc::vi2d vStartPosition;
+		olc::vi2d vEndPosition;
+		int iIndex;
+		ChunkIndexes(int index, olc::vi2d position, olc::vi2d* tileCount, olc::vi2d* tileSize) {
+			iIndex = index;
+			vStartPosition = position;
+			vEndPosition = position * *tileCount * *tileSize;
+		}
+	};
+
 	class tile 
 	{
 	public:
@@ -128,6 +139,8 @@ namespace ScrollingMap
 			std::string sChunkLocation, sTileLocation, sSpriteRenderLocation, sTileAwareness;
 
 			std::vector<std::unique_ptr<chunk>> vChunk;
+			std::vector<std::unique_ptr<ChunkIndexes>> vChunkIndexes;
+			std::vector<int> vChunkActiveIndexes;
 
 			std::vector<olc::Sprite*> chunkSprite;
 			std::vector<olc::Decal*> chunkDecal;
@@ -151,15 +164,14 @@ namespace ScrollingMap
             }
 
 			~GameWorld() {
-				//delete viChunkCount;
-				//delete viChunkTileCount;
-				//delete viTileSize;
+
 			}
 
-			void GenerateWorld(int worldSeed) {
+			void GenerateWorld(int worldSeed, olc::vi2d* viStartingPosition) {
+
 
 				//doesnt currently do anything.
-
+				/*
 				seed = worldSeed;
 
 				// Create a random number generator and seed it with a fixed value
@@ -172,18 +184,49 @@ namespace ScrollingMap
 				for (int i = 0; i < 5; ++i) {
 					int random_number = distribution(generator);
 				}
+				*/
 
-			}
-			
-			void GenerateChunks(olc::PixelGameEngine* pge, olc::vi2d* vfChunkPosition)
-			{
-				for (int y = 0; y < viChunkCount->y; y++) {
-					for (int x = 0; x < viChunkCount->x; x++) {				
-						vChunk.push_back(std::make_unique<chunk>(olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y),
-							viChunkTileCount, viTileSize));
+
+				// we want to generate the chunks surrounding the starting position.
+				// refactor the GenerateChunks function to use the vfChunkPosition argument (and maybe rename it)
+				// this argument should somehow determine which location to generate the chunk in.
+				
+				// Chunk positioning is based on a grid of chunktilecount * tilesize.
+				// If a player is occupying a chunk and goes within X distance of a chunk edge, that chunk should be loaded ready.
+
+				// try using X as one chunk, ie load all chunks within 1 chunk of player
+
+				// starting chunk
+				int chunkX = std::floor((viStartingPosition->x / viChunkTileCount->x));
+				int chunkY = std::floor((viStartingPosition->y / viChunkTileCount->y));
+				int chunkIndex = chunkY * viChunkCount->y + chunkX;
+
+				/////////////////////////////////////
+				// this doesnt work!
+				for (int y = chunkY - 1; y < chunkY + 1; y++) {
+					for (int x = chunkX - 1; x < chunkX + 1; x++) {
+						GenerateChunk(x, y);
 					}
 				}
 
+			}
+			
+			void GenerateChunks(olc::vi2d* vfPosition)
+			{
+				// this was the OG generate chunks function
+				for (int y = 0; y < viChunkCount->y; y++) {
+					for (int x = 0; x < viChunkCount->x; x++) {				
+						GenerateChunk(x, y);
+					}
+				}
+			}
+
+			void GenerateChunk(int x, int y)
+			{
+				vChunk.push_back(std::make_unique<chunk>(olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y),
+					viChunkTileCount, viTileSize));
+				vChunkIndexes.push_back(std::make_unique<ChunkIndexes>(vChunkIndexes.size(), olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y),
+					viChunkTileCount, viTileSize));
 			}
 
 			bool UpdatePlayerPosition(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition) {
