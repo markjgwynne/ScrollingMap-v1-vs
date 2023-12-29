@@ -2,6 +2,7 @@
 
 using namespace std;
 
+#include "sharedUtilities.h"
 #include "olcPixelGameEngine.h"
 
 #ifndef PLAYER_H_INCLUDED
@@ -9,6 +10,7 @@ using namespace std;
 
 namespace ScrollingMap
 {
+
 	class Character
 	{
 	public:
@@ -16,6 +18,9 @@ namespace ScrollingMap
 		olc::vi2d *viPosition;
 		olc::vi2d *viTileSize;
 		olc::vi2d viNextPosition;
+
+		xDirection xAxisDirection;
+		yDirection yAxisDirection;
 
 		std::string sPlayerLocation;
 
@@ -29,6 +34,8 @@ namespace ScrollingMap
 			viPosition = position;
 			viNextPosition = *position;
 			viTileSize = tileSize;
+			xAxisDirection = xDirection::NONE_X;
+			yAxisDirection = yDirection::NONE_Y;
 
 		}
 		~Character() {
@@ -51,6 +58,27 @@ namespace ScrollingMap
 			if (pge->GetKey(olc::Key::A).bHeld) viNextPosition.x -= iMovementSpeed * pge->GetElapsedTime();
 			if (pge->GetKey(olc::Key::D).bHeld) viNextPosition.x += iMovementSpeed * pge->GetElapsedTime();
 			*/
+
+			if (viNextPosition.x > viPosition->x) {
+				// EAST, positive x axis movement
+				xAxisDirection = xDirection::EAST;
+			} else if (viNextPosition.x > viPosition->x) {
+				// WEST, negative x axis movement
+				xAxisDirection = xDirection::WEST;
+			} else {
+				xAxisDirection = xDirection::NONE_X;
+			}
+
+			if (viNextPosition.y > viPosition->y) {
+				// SOUTH, positive x axis movement
+				yAxisDirection = yDirection::SOUTH;
+			} else if (viNextPosition.y > viPosition->y) {
+				// NORTH, negative x axis movement
+				yAxisDirection = yDirection::NORTH;
+			} else {
+				yAxisDirection = yDirection::NONE_Y;
+			}
+
 			return &viNextPosition;
 			
 		}

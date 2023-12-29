@@ -30,7 +30,7 @@ namespace ScrollingMap
 		{
 			
 		}
-				
+		
 		float fMovementIncrement = 100.0f;
 
 		/*
@@ -52,8 +52,6 @@ namespace ScrollingMap
 		GameWorld world = GameWorld(&chunkCount, &tileCount, &tileSize, &renderDistance);
 		Character player = Character(&viPlayerPos, &tileSize);
 
-		olc::Sprite* sprTest = nullptr;
-
 		bool OnUserCreate() override
 		{
 			world.GenerateWorld(123, &viPlayerPos);
@@ -72,10 +70,11 @@ namespace ScrollingMap
 			Clear(olc::WHITE);
 
 			// HANDLE MOVEMENT AND COLLISION DETECTION
-			
-			if (world.UpdatePlayerPosition(this, player.GetNextPosition(this)) == true) {
+						
+			if (world.UpdatePlayerPosition(this, player.viPosition, player.GetNextPosition(this), player.xAxisDirection, player.yAxisDirection) == true) {
 				player.SetNextPosition();
 			};
+			
 			
 			// RENDER SCREEN
 

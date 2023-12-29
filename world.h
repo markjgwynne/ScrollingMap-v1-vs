@@ -5,37 +5,17 @@ using namespace std;
 #include <random>
 #include <map>
 #include <math.h>
+#include <algorithm>
+#include <vector>
 
+#include "sharedUtilities.h"
 #include "olcPixelGameEngine.h"
 
-#ifndef MAP_H_INCLUDED
-#define MAP_H_INCLUDED
+#ifndef WORLD_H_INCLUDED
+#define WORLD_H_INCLUDED
 
 namespace ScrollingMap
 {
-
-	enum tiletype
-	{
-		Grass,
-		Tree,
-		Sand,
-		Path
-	};
-
-	std::map<tiletype, olc::Pixel> tileMap;
-	std::map<tiletype, std::string> tileTypeName;
-	
-	struct ChunkIndexes
-	{
-		olc::vi2d vStartPosition;
-		olc::vi2d vEndPosition;
-		int iIndex;
-		ChunkIndexes(int index, olc::vi2d position, olc::vi2d* tileCount, olc::vi2d* tileSize) {
-			iIndex = index;
-			vStartPosition = position;
-			vEndPosition = position * *tileCount * *tileSize;
-		}
-	};
 
 	class tile 
 	{
@@ -139,7 +119,7 @@ namespace ScrollingMap
 			std::string sChunkLocation, sTileLocation, sSpriteRenderLocation, sTileAwareness;
 
 			std::vector<std::unique_ptr<chunk>> vChunk;
-			std::vector<std::unique_ptr<ChunkIndexes>> vChunkIndexes;
+			std::vector<std::unique_ptr<olc::vi2d>> vChunkIndexes;
 			std::vector<int> vChunkActiveIndexes;
 
 			std::vector<olc::Sprite*> chunkSprite;
@@ -150,16 +130,6 @@ namespace ScrollingMap
 				viChunkTileCount = tileCount;
 				viTileSize = tileSize;
 				viRenderDistance = renderDistance;
-
-				tileMap[Grass] = olc::GREEN;
-				tileMap[Tree] = olc::DARK_GREEN;
-				tileMap[Sand] = olc::DARK_YELLOW;
-				tileMap[Path] = olc::GREY;
-
-				tileTypeName[Grass] = "Grass";
-				tileTypeName[Tree] = "Tree";
-				tileTypeName[Sand] = "Sand";
-				tileTypeName[Path] = "Path";
 
             }
 
@@ -186,11 +156,10 @@ namespace ScrollingMap
 				}
 				*/
 
-
 				// we want to generate the chunks surrounding the starting position.
 				// refactor the GenerateChunks function to use the vfChunkPosition argument (and maybe rename it)
 				// this argument should somehow determine which location to generate the chunk in.
-				
+
 				// Chunk positioning is based on a grid of chunktilecount * tilesize.
 				// If a player is occupying a chunk and goes within X distance of a chunk edge, that chunk should be loaded ready.
 
@@ -201,23 +170,15 @@ namespace ScrollingMap
 				int chunkY = std::floor((viStartingPosition->y / viChunkTileCount->y));
 				int chunkIndex = chunkY * viChunkCount->y + chunkX;
 
-				/////////////////////////////////////
-				// this doesnt work!
-				for (int y = chunkY - 1; y < chunkY + 1; y++) {
-					for (int x = chunkX - 1; x < chunkX + 1; x++) {
+				for (int y = chunkY - viRenderDistance->y; y < chunkY + viRenderDistance->y; y++) {
+					for (int x = chunkX - viRenderDistance->x; x < chunkX + viRenderDistance->x; x++) {
 						GenerateChunk(x, y);
 					}
 				}
 
-			}
-			
-			void GenerateChunks(olc::vi2d* vfPosition)
-			{
-				// this was the OG generate chunks function
-				for (int y = 0; y < viChunkCount->y; y++) {
-					for (int x = 0; x < viChunkCount->x; x++) {				
-						GenerateChunk(x, y);
-					}
+				// assign the starting chunks as visible
+				for (int i = 0; i < vChunkIndexes.size(); i++) {
+					vChunkActiveIndexes.push_back(i);
 				}
 			}
 
@@ -225,33 +186,62 @@ namespace ScrollingMap
 			{
 				vChunk.push_back(std::make_unique<chunk>(olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y),
 					viChunkTileCount, viTileSize));
-				vChunkIndexes.push_back(std::make_unique<ChunkIndexes>(vChunkIndexes.size(), olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y),
-					viChunkTileCount, viTileSize));
+				vChunkIndexes.push_back(std::make_unique<olc::vi2d>(vChunkIndexes.size(), olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y)));
 			}
 
-			bool UpdatePlayerPosition(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition) {
+			bool UpdatePlayerPosition(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition, olc::vi2d* viCurrentPosition, xDirection xD, yDirection yD) {
 
-				if (IsCollision(pge, viNextPosition) == false) {
-					MovePlayer();
-					return true;
-				};
+				if (viCurrentPosition == viNextPosition) {
+					// no player movement, just update the world
+					return false;
+				}
 
-				return false;
+				// the player did move to a new tile
 
+				// get chunk and tile positions
+				int chunkX = std::floor((viNextPosition->x / viChunkTileCount->x));
+				int chunkY = std::floor((viNextPosition->y / viChunkTileCount->y));
+				int chunkIndex = chunkY * viChunkCount->y + chunkX;
+
+				int tileX = std::fmodf(viNextPosition->x, (float)viChunkTileCount->x);
+				int tileY = std::fmodf(viNextPosition->y, (float)viChunkTileCount->y);
+				int tileIndex = (tileY * viChunkTileCount->y + tileX);
+				
+				// determine if collision in tile
+				if (IsCollision(chunkIndex, tileIndex) == true) {
+					// collision
+					// no player movement
+					// update the world and run collision action
+					return false;
+				}
+								
+				// no collision
+				// update the world and move player
+
+				if (iChunkIndex != chunkIndex) {
+					UpdateChunks(chunkX, chunkY, viNextPosition, viCurrentPosition, xD, yD);
+				}
+
+				// save the positions for use when determining world position
+				iChunkIndex = chunkIndex;
+				iTileIndex = tileIndex;
+				iChunkX = chunkX;
+				iChunkY = chunkY;
+
+				MovePlayer();
+
+				return true;
+				
 			}
 
 			void Render(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
 
 				// pixel rendering
-				int index = 0;
-				for (auto& chunk : vChunk) // access by reference to avoid copying
+				for (int i = 0; i < vChunkActiveIndexes.size(); i++)
 				{
-					if (chunk->bRenderChunk) {
-						chunk->Render(pge, viCameraOffset);
-						// render the chunk index in the top left corner for debugging
-						//pge->DrawString((chunk->viPosition + *viCameraOffset) * *viTileSize, std::to_string(index), olc::BLACK);
-					}
-					index += 1;
+					vChunk[i]->Render(pge, viCameraOffset);
+					// render the chunk index in the top left corner for debugging
+					//pge->DrawString((chunk->viPosition + *viCameraOffset) * *viTileSize, std::to_string(index), olc::BLACK);
 				}
 
 			}
@@ -291,32 +281,93 @@ namespace ScrollingMap
 
 		private:
 
-			bool IsCollision(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition) {
+			bool IsCollision(int chunkIndex, int tileIndex) {
 				//x * chunkCountWidth + y;
 
-				int chunkX = std::floor((viNextPosition->x / viChunkTileCount->x));
-				int chunkY = std::floor((viNextPosition->y / viChunkTileCount->y));
-				int chunkIndex = chunkY * viChunkCount->y + chunkX;
-
-				int tileX = std::fmodf(viNextPosition->x, (float)viChunkTileCount->x);
-				int tileY = std::fmodf(viNextPosition->y, (float)viChunkTileCount->y);
-				int tileIndex = (tileY * viChunkTileCount->y + tileX);
-
 				if (vChunk[chunkIndex]->vTiles[tileIndex]->eTileType == Tree) {
-					// collision. update nothing, return true;
+					// collision. update nothing
+					// return true;
 					return true;
 				}
 				else {
-					// no collision, continue rendering normal movement
-					// save the positions for use when determining world position
-					iChunkIndex = chunkIndex;
-					iTileIndex = tileIndex;
-					iChunkX = chunkX;
-					iChunkY = chunkY;
+					// no collision, continue rendering normal movement 
+					// return false
 					
 					return false;
 				}
 
+			}
+
+			void UpdateChunks(int chunkY, int chunkX, olc::vi2d* viNextPosition, olc::vi2d* viCurrentPosition, xDirection xD, yDirection yD) {
+
+				//////////////////////////////////////////////
+				// how on earth do i do this?
+				// 
+				// i need to check if the new location chunks exist
+				// detect the movement first, ie y - 1 or x + 1, etc.
+				// then determine if the render distance opposite to the previous movement exists
+
+				int renderChunkY, renderChunkX;
+
+				if (xD == xDirection::EAST) {
+					renderChunkX = viNextPosition->x + 1;
+				}
+				else if (xD == xDirection::WEST) {
+					renderChunkX = viNextPosition->x - 1;
+				}
+
+				if (yD == yDirection::SOUTH) {
+					renderChunkY = viNextPosition->y + 1;
+				}
+				else if (yD == yDirection::NORTH) {
+					renderChunkY = viNextPosition->y - 1;
+				}
+
+				/*
+				// this might be covered now by the next section...where the generation of chunks and the adding to active chunk indexes is combined together
+				// generate new chunks
+				for (int y = renderChunkY - viRenderDistance->y; y < renderChunkY + viRenderDistance->y; y++) {
+					if (std::find(vChunkIndexes.begin(), vChunkIndexes.end(), olc::vi2d(chunkX, y)) != vChunkIndexes.end())
+					{
+						continue;
+					}
+					GenerateChunk(chunkX, y);
+				}
+				for (int x = renderChunkX - viRenderDistance->x; x < renderChunkX + viRenderDistance->x; x++) {
+					if (std::find(vChunkIndexes.begin(), vChunkIndexes.end(), olc::vi2d(x, chunkY)) != vChunkIndexes.end())
+					{
+						continue;
+					}
+					GenerateChunk(x, chunkY);
+				}
+				*/
+
+				// what about the visible chunks?
+				// do i delete and re-run this? 
+				// or is there a way to update it, ie replace previous with new?
+
+				// detect the movement, ie y - 1 or x + 1, etc.
+				// use this to remove the opposite end of the render distance and add the new one
+
+				// add all chunk indexes to active chunk vector
+				vChunkActiveIndexes.clear();
+				for (int y = renderChunkY - viRenderDistance->y; y < renderChunkY + viRenderDistance->y; y++) {
+					for (int x = renderChunkX - viRenderDistance->x; x < renderChunkX + viRenderDistance->x; x++) {
+						
+						auto it = find(vChunkIndexes.begin(), vChunkIndexes.end(), olc::vi2d(x, y));
+
+						int index;
+						if (it != vChunkIndexes.end())
+						{
+							int index = it - vChunkIndexes.begin();
+						}
+						else {
+							GenerateChunk(x, y);
+							index = vChunkIndexes.size();
+						}
+						vChunkActiveIndexes.push_back(index);
+					}
+				}
 			}
 
 			void MovePlayer() {
