@@ -189,6 +189,7 @@ namespace ScrollingMap
 				vChunkIndexes.push_back(std::make_unique<olc::vi2d>(vChunkIndexes.size(), olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y)));
 			}
 
+			/*
 			bool UpdatePlayerPosition(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition, olc::vi2d* viCurrentPosition, xDirection xD, yDirection yD) {
 
 				if (viCurrentPosition == viNextPosition) {
@@ -219,7 +220,7 @@ namespace ScrollingMap
 				// update the world and move player
 
 				if (iChunkIndex != chunkIndex) {
-					UpdateChunks(chunkX, chunkY, viNextPosition, viCurrentPosition, xD, yD);
+					//UpdateChunks(chunkX, chunkY, viNextPosition, viCurrentPosition, xD, yD);
 				}
 
 				// save the positions for use when determining world position
@@ -228,18 +229,20 @@ namespace ScrollingMap
 				iChunkX = chunkX;
 				iChunkY = chunkY;
 
-				MovePlayer();
+				//MovePlayer();
 
 				return true;
 				
 			}
+			*/
+			
 
 			void Render(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
 
 				// pixel rendering
 				for (int i = 0; i < vChunkActiveIndexes.size(); i++)
 				{
-					vChunk[vChunkActiveIndexes[i]]->Render(pge, viCameraOffset);
+					//vChunk[vChunkActiveIndexes[i]]->Render(pge, viCameraOffset);
 					// render the chunk index in the top left corner for debugging
 					//pge->DrawString((chunk->viPosition + *viCameraOffset) * *viTileSize, std::to_string(index), olc::BLACK);
 				}
@@ -280,7 +283,8 @@ namespace ScrollingMap
 			}
 
 		private:
-
+			
+			/*
 			bool IsCollision(int chunkIndex, int tileIndex) {
 				//x * chunkCountWidth + y;
 
@@ -297,6 +301,9 @@ namespace ScrollingMap
 				}
 
 			}
+			*/
+
+			/*
 
 			void UpdateChunks(int chunkY, int chunkX, olc::vi2d* viNextPosition, olc::vi2d* viCurrentPosition, xDirection xD, yDirection yD) {
 
@@ -350,6 +357,7 @@ namespace ScrollingMap
 				// use this to remove the opposite end of the render distance and add the new one
 
 				// add all chunk indexes to active chunk vector
+				/*
 				vChunkActiveIndexes.clear();
 				for (int y = renderChunkY - viRenderDistance->y; y < renderChunkY + viRenderDistance->y; y++) {
 					for (int x = renderChunkX - viRenderDistance->x; x < renderChunkX + viRenderDistance->x; x++) {
@@ -368,8 +376,10 @@ namespace ScrollingMap
 						vChunkActiveIndexes.push_back(index);
 					}
 				}
+				
 			}
-
+			*/
+			/*
 			void MovePlayer() {
 				
 				for (int y = 0; y < viChunkCount->y; y++) {
@@ -393,6 +403,7 @@ namespace ScrollingMap
 				sTileLocation = "Tile index: " + std::to_string(iTileIndex) + " of " + std::to_string(vChunk[iChunkIndex]->vTiles.size());
 				sTileAwareness = "Tile Type: " + tileTypeName[vChunk[iChunkIndex]->vTiles[iTileIndex]->eTileType];
 			}
+			*/
 
     };
 }

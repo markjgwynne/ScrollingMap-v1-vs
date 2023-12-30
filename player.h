@@ -59,6 +59,7 @@ namespace ScrollingMap
 			if (pge->GetKey(olc::Key::D).bHeld) viNextPosition.x += iMovementSpeed * pge->GetElapsedTime();
 			*/
 
+			/*
 			if (viNextPosition.x > viPosition->x) {
 				// EAST, positive x axis movement
 				xAxisDirection = xDirection::EAST;
@@ -78,6 +79,7 @@ namespace ScrollingMap
 			} else {
 				yAxisDirection = yDirection::NONE_Y;
 			}
+			*/
 
 			return &viNextPosition;
 			
