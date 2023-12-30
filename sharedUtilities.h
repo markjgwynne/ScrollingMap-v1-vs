@@ -1,10 +1,9 @@
 #pragma once
 
-#ifndef SHAREDUTILITIES_H_INCLUDED
-#define SHAREDUTILITIES_H_INCLUDED
-
 #include "olcPixelGameEngine.h"
 
+#ifndef SHAREDUTILITIES_H_INCLUDED
+#define SHAREDUTILITIES_H_INCLUDED
 
 namespace ScrollingMap
 {

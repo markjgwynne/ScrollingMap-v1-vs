@@ -11,8 +11,8 @@ using namespace std;
 #include "sharedUtilities.h"
 #include "olcPixelGameEngine.h"
 
-#ifndef WORLD_H_INCLUDED
-#define WORLD_H_INCLUDED
+#ifndef MAP_H_INCLUDED
+#define MAP_H_INCLUDED
 
 namespace ScrollingMap
 {
@@ -239,7 +239,7 @@ namespace ScrollingMap
 				// pixel rendering
 				for (int i = 0; i < vChunkActiveIndexes.size(); i++)
 				{
-					vChunk[i]->Render(pge, viCameraOffset);
+					vChunk[vChunkActiveIndexes[i]]->Render(pge, viCameraOffset);
 					// render the chunk index in the top left corner for debugging
 					//pge->DrawString((chunk->viPosition + *viCameraOffset) * *viTileSize, std::to_string(index), olc::BLACK);
 				}
@@ -359,7 +359,7 @@ namespace ScrollingMap
 						int index;
 						if (it != vChunkIndexes.end())
 						{
-							int index = it - vChunkIndexes.begin();
+							index = (int)(it - vChunkIndexes.begin());
 						}
 						else {
 							GenerateChunk(x, y);
