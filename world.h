@@ -119,7 +119,7 @@ namespace ScrollingMap
 			std::string sChunkLocation, sTileLocation, sSpriteRenderLocation, sTileAwareness;
 
 			std::vector<std::unique_ptr<chunk>> vChunk;
-			std::vector<std::unique_ptr<olc::vi2d>> vChunkIndexes;
+			std::vector<olc::vi2d> vChunkIndexes;
 			std::vector<int> vChunkActiveIndexes;
 
 			std::vector<olc::Sprite*> chunkSprite;
@@ -186,7 +186,7 @@ namespace ScrollingMap
 			{
 				vChunk.push_back(std::make_unique<chunk>(olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y),
 					viChunkTileCount, viTileSize));
-				vChunkIndexes.push_back(std::make_unique<olc::vi2d>(vChunkIndexes.size(), olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y)));
+				vChunkIndexes.push_back(olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y));
 			}
 
 			bool UpdatePlayerPosition(olc::PixelGameEngine* pge, olc::vi2d* viNextPosition, olc::vi2d* viCurrentPosition, xDirection xD, yDirection yD) {

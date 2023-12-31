@@ -92,8 +92,8 @@ namespace ScrollingMap
 				player.RenderSprite(this, &viCameraOffset);
 			} else {
 				viMapPosition = { viCameraOffset - viPlayerPos }; // pixel rendering version
-				world.Render(this, &viMapPosition);
-				player.Render(this, &viCameraOffset);
+				//world.Render(this, &viMapPosition);
+				//player.Render(this, &viCameraOffset);
 			}
 
 			int sY = 1, textHeight = 10;
