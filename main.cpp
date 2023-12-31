@@ -70,11 +70,9 @@ namespace ScrollingMap
 			Clear(olc::WHITE);
 
 			// HANDLE MOVEMENT AND COLLISION DETECTION
-			/*
 			if (world.UpdatePlayerPosition(this, player.viPosition, player.GetNextPosition(this), player.xAxisDirection, player.yAxisDirection) == true) {
 				player.SetNextPosition();
 			};
-			*/
 						
 			// RENDER SCREEN
 
