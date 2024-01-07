@@ -245,6 +245,7 @@ namespace ScrollingMap
 				olc::vi2d nextPosition = olc::vi2d(0, 0);
 
 				/*
+				* Reimplement this later
 				bool collision = true;
 				do {
 					startingPosition.x = rand() % 10 + 1;
@@ -256,6 +257,8 @@ namespace ScrollingMap
 				// get chunk and tile positions
 				int chunkX = std::floor((startingPosition.x / viChunkTileCount->x));
 				int chunkY = std::floor((startingPosition.y / viChunkTileCount->y));
+				
+				// does this still work? i dont think so
 				int chunkIndex = chunkY * viChunkCount->y + chunkX;
 
 				int tileX = std::fmodf(startingPosition.x, (float)viChunkTileCount->x);
