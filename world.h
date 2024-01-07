@@ -161,6 +161,36 @@ namespace ScrollingMap
 		}
 	};
 
+	struct worldPosition {
+		int iChunkX;
+		int iChunkY;
+		int iChunkIndex;
+		int iTileIndex;
+		olc::vi2d* viChunkTileCount;
+		
+		worldPosition(olc::vi2d* chunkTileCount) {
+			viChunkTileCount = chunkTileCount;
+		}
+		worldPosition(olc::vi2d* position, olc::vi2d* chunkTileCount) {
+
+			viChunkTileCount = chunkTileCount;
+			setPosition(position);
+
+		}
+		void setPosition(olc::vi2d* position) {
+			// get chunk and tile positions
+			int chunkX = std::floor((position->x / viChunkTileCount->x));
+			int chunkY = std::floor((position->y / viChunkTileCount->y));
+
+			// does this still work? i dont think so
+			//int chunkIndex = chunkY * viChunkCount->y + chunkX;
+
+			int tileX = std::fmodf(position->x, (float)viChunkTileCount->x);
+			int tileY = std::fmodf(position->y, (float)viChunkTileCount->y);
+			//int tileIndex = (tileY * viChunkTileCount->y + tileX);
+		}
+	};
+
     class GameWorld {
         public:
 
@@ -172,6 +202,9 @@ namespace ScrollingMap
 			olc::vi2d* viRenderDistance;
 
 			int iChunkIndex, iTileIndex, iChunkX, iChunkY;
+			worldPosition currentPosition;
+			worldPosition nextPosition;
+
 
 			std::string sChunkLocation, sTileLocation, sSpriteRenderLocation, sTileAwareness;
 
@@ -197,7 +230,6 @@ namespace ScrollingMap
 
 			olc::vi2d GenerateWorld(olc::PixelGameEngine* pge, int worldSeed) {
 
-
 				//doesnt currently do anything.
 				/*
 				seed = worldSeed;
@@ -213,15 +245,6 @@ namespace ScrollingMap
 					int random_number = distribution(generator);
 				}
 				*/
-
-				// we want to generate the chunks surrounding the starting position.
-				// refactor the GenerateChunks function to use the vfChunkPosition argument (and maybe rename it)
-				// this argument should somehow determine which location to generate the chunk in.
-
-				// Chunk positioning is based on a grid of chunktilecount * tilesize.
-				// If a player is occupying a chunk and goes within X distance of a chunk edge, that chunk should be loaded ready.
-
-				// try using X as one chunk, ie load all chunks within 1 chunk of player
 
 				/*
 				// starting chunk x and y coordinates
@@ -292,7 +315,14 @@ namespace ScrollingMap
 
 			}
 
+			int
+
 			bool UpdatePlayerPosition(olc::PixelGameEngine* pge, olc::vi2d* viCurrentPosition, olc::vi2d* viNextPosition) {
+
+				// Chunk positioning is based on a grid of chunktilecount * tilesize.
+				// If a player is occupying a chunk and goes within X distance of a chunk edge, that chunk should be loaded ready.
+
+				// try using X as one chunk, ie load all chunks within 1 chunk of player
 
 				/*
 				* split out all of the actions here to perform one specific task only
