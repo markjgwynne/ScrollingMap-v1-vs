@@ -294,6 +294,13 @@ namespace ScrollingMap
 
 			bool UpdatePlayerPosition(olc::PixelGameEngine* pge, olc::vi2d* viCurrentPosition, olc::vi2d* viNextPosition) {
 
+				/*
+				* split out all of the actions here to perform one specific task only
+				* 
+				* use the chunkX and chunkY to create an olc::vi2d object and find the cChunkIndexes object that matches.
+				*	(the above replaces: int chunkIndex = chunkY * viChunkCount->y + chunkX;)
+				*/
+
 				if (viCurrentPosition->x == viNextPosition->x && viCurrentPosition->y == viNextPosition->y) {
 					// no player movement, just update the world
 					return false;
