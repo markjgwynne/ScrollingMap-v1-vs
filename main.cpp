@@ -54,7 +54,7 @@ namespace ScrollingMap
 
 		bool OnUserCreate() override
 		{
-			world.GenerateWorld(123, &viPlayerPos);
+			viPlayerPos = world.GenerateWorld(this, 123);
 
 			if (useSprites) {
 				player.GenerateSprite(this);
@@ -70,7 +70,7 @@ namespace ScrollingMap
 			Clear(olc::WHITE);
 
 			// HANDLE MOVEMENT AND COLLISION DETECTION
-			if (world.UpdatePlayerPosition(this, player.viPosition, player.GetNextPosition(this), player.xAxisDirection, player.yAxisDirection) == true) {
+			if (world.UpdatePlayerPosition(this, player.viPosition, player.GetNextPosition(this)) == true) {
 				player.SetNextPosition();
 			};
 			
