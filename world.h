@@ -162,32 +162,65 @@ namespace ScrollingMap
 	};
 
 	struct worldPosition {
+		olc::vi2d viChunkTileCount;
+		olc::vi2d viPosition;
 		int iChunkX;
 		int iChunkY;
 		int iChunkIndex;
-		int iTileIndex;
-		olc::vi2d* viChunkTileCount;
+		olc::vi2d viChunkPosition;
+		int iTileX;
+		int iTileY;
+		int iTileIndex;		
+		std::vector<chunkIndex>* vChunkIndexes;
+
+		worldPosition()
+		{
+		};
 		
-		worldPosition(olc::vi2d* chunkTileCount) {
-			viChunkTileCount = chunkTileCount;
+		worldPosition(olc::vi2d* chunkTileCount, std::vector<chunkIndex>* chunkIndexes) {
+			viChunkTileCount = *chunkTileCount;
+			vChunkIndexes = chunkIndexes;
 		}
-		worldPosition(olc::vi2d* position, olc::vi2d* chunkTileCount) {
+		int getChunkIndex(int position, int tileCount) {
 
-			viChunkTileCount = chunkTileCount;
-			setPosition(position);
+			iChunkX = position / tileCount * tileCount;
 
 		}
-		void setPosition(olc::vi2d* position) {
-			// get chunk and tile positions
-			int chunkX = std::floor((position->x / viChunkTileCount->x));
-			int chunkY = std::floor((position->y / viChunkTileCount->y));
+		bool setWorldPosition(olc::vi2d* position) {
 
-			// does this still work? i dont think so
-			//int chunkIndex = chunkY * viChunkCount->y + chunkX;
+			viPosition = *position;
 
-			int tileX = std::fmodf(position->x, (float)viChunkTileCount->x);
-			int tileY = std::fmodf(position->y, (float)viChunkTileCount->y);
-			//int tileIndex = (tileY * viChunkTileCount->y + tileX);
+			// get chunk position
+			// // wokring on this.
+			//iChunkX = std::abs(std::floor((position->x / viChunkTileCount->x)));
+			//iChunkY = std::abs(std::floor((position->y / viChunkTileCount->y)));
+
+			if (viPosition.x < 0) {
+				int x = 0;
+			}
+			
+			iChunkX = viPosition.x / viChunkTileCount.x;
+			iChunkY = viPosition.y / viChunkTileCount.y;
+			
+			viChunkPosition = olc::vi2d(iChunkX, iChunkY);
+
+			// set the tile index based on the position
+			// the tile index cannot be negative
+			iTileX = std::fmodf(std::abs(position->x), (float)viChunkTileCount.x);
+			iTileY = std::fmodf(std::abs(position->y), (float)viChunkTileCount.y);
+			iTileIndex = (iTileY * viChunkTileCount.y + iTileX);
+
+			auto item = find(vChunkIndexes->begin(), vChunkIndexes->end(), viChunkPosition);
+
+			if (item != vChunkIndexes->end())
+			{
+				iChunkIndex = (int)(item - vChunkIndexes->begin());
+				return true;
+			}
+			else {
+				iChunkIndex = -1;
+				return false;
+			}
 		}
 	};
 
@@ -200,12 +233,7 @@ namespace ScrollingMap
 			olc::vi2d* viChunkTileCount;
 			olc::vi2d* viTileSize;
 			olc::vi2d* viRenderDistance;
-
-			int iChunkIndex, iTileIndex, iChunkX, iChunkY;
-			worldPosition currentPosition;
-			worldPosition nextPosition;
-
-
+			
 			std::string sChunkLocation, sTileLocation, sSpriteRenderLocation, sTileAwareness;
 
 			int iChunkCount;
@@ -216,12 +244,19 @@ namespace ScrollingMap
 			std::vector<olc::Sprite*> chunkSprite;
 			std::vector<olc::Decal*> chunkDecal;
 
+			int iChunkIndex, iTileIndex, iChunkX, iChunkY;
+			worldPosition positionPrevious;
+			worldPosition positionCurrent;
+
 			GameWorld(olc::vi2d* chunkCount, olc::vi2d* tileCount, olc::vi2d* tileSize, olc::vi2d* renderDistance) {
 				viChunkCount = chunkCount;
 				viChunkTileCount = tileCount;
 				viTileSize = tileSize;
 				viRenderDistance = renderDistance;
 				iChunkCount = 0;
+
+				positionPrevious = worldPosition(viChunkTileCount, &vChunkIndexes);
+				positionCurrent = worldPosition(viChunkTileCount, &vChunkIndexes);
             }
 
 			~GameWorld() {
@@ -245,77 +280,44 @@ namespace ScrollingMap
 					int random_number = distribution(generator);
 				}
 				*/
-
-				/*
-				// starting chunk x and y coordinates
-				int chunkX = std::floor((viStartingPosition->x / viChunkTileCount->x));
-				int chunkY = std::floor((viStartingPosition->y / viChunkTileCount->y));
 				
-				// add all the chunks within render distance of the starting position
-				for (int y = chunkY - viRenderDistance->y; y <= chunkY + viRenderDistance->y; y++) {
-					for (int x = chunkX - viRenderDistance->x; x <= chunkX + viRenderDistance->x; x++) {
-						int index = GenerateChunk(x, y) - 1;
-
-						// set the chunk index (where the player is)
-						if (x == chunkX && y == chunkY) {
-							iChunkIndex = index;
-						}
-					}
-				}
-				*/
-
 				olc::vi2d startingPosition = olc::vi2d(3, 3);
-				olc::vi2d nextPosition = olc::vi2d(0, 0);
-
 				/*
-				* Reimplement this later
+				* Reimplement this later to upgrade the starting position above to random
+				* also update it to allow random in a negative and positive direction
+				startingPosition.x = rand() % 10 + 1;
+				startingPosition.y = rand() % 10 + 1;
 				bool collision = true;
 				do {
-					startingPosition.x = rand() % 10 + 1;
-					startingPosition.y = rand() % 10 + 1;
+					startingPosition.x += 1; 
+					startingPosition.y += 1;
 					collision = UpdatePlayerPosition(pge, &nextPosition, &startingPosition);
 				} while (collision == true);
 				*/
 
-				// get chunk and tile positions
-				int chunkX = std::floor((startingPosition.x / viChunkTileCount->x));
-				int chunkY = std::floor((startingPosition.y / viChunkTileCount->y));
-				
-				// does this still work? i dont think so
-				int chunkIndex = chunkY * viChunkCount->y + chunkX;
-
-				int tileX = std::fmodf(startingPosition.x, (float)viChunkTileCount->x);
-				int tileY = std::fmodf(startingPosition.y, (float)viChunkTileCount->y);
-				int tileIndex = (tileY * viChunkTileCount->y + tileX);
+				positionCurrent.setWorldPosition(&startingPosition);
+				positionPrevious = positionCurrent;
 
 				// update the world and move player
-				UpdateChunks(chunkX, chunkY);
+				LoadChunks(positionCurrent.iChunkX, positionCurrent.iChunkY);
+
+				positionCurrent.setWorldPosition(&startingPosition); // recall the method to set the chunk index
+
+				/*
+				* // this is useful elsewhere maybe?
+				if (positionCurrent.setWorldPosition(&startingPosition) == false) {
+					// indicates the chunk doesnt exist
+					positionCurrent.iChunkIndex = GenerateChunk(positionCurrent.iChunkX, positionCurrent.iChunkY) - 1;
+				}
+				*/
 
 				// sort the chunk indexes
 				std::sort(vChunkIndexes.begin(), vChunkIndexes.end(), CompareByPosition());
-
-				// save the positions for use when determining world position
-				iChunkIndex = chunkIndex;
-				iTileIndex = tileIndex;
-				iChunkX = chunkX;
-				iChunkY = chunkY;
 
 				MovePlayerMapPosition();
 
 				return startingPosition;
 			}
-
-			int GenerateChunk(int x, int y)
-			{
-				vChunk.push_back(std::make_unique<chunk>(olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y),
-					viChunkTileCount, viTileSize));
-				vChunkIndexes.push_back(chunkIndex(olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y), iChunkCount));
-				iChunkCount += 1;
-				return iChunkCount;
-
-			}
-
-			int
 
 			bool UpdatePlayerPosition(olc::PixelGameEngine* pge, olc::vi2d* viCurrentPosition, olc::vi2d* viNextPosition) {
 
@@ -332,43 +334,43 @@ namespace ScrollingMap
 				*/
 
 				if (viCurrentPosition->x == viNextPosition->x && viCurrentPosition->y == viNextPosition->y) {
-					// no player movement, just update the world
+					// no player movement, therefore make the previous world position match the current world position
+					positionPrevious = positionCurrent;
+
+					// update the world
+
 					return false;
 				}
 
 				// the player did move to a new tile
+				// back up the world position
+				positionPrevious = positionCurrent;
 
-				// get chunk and tile positions
-				int chunkX = std::floor((viNextPosition->x / viChunkTileCount->x));
-				int chunkY = std::floor((viNextPosition->y / viChunkTileCount->y));
-				int chunkIndex = chunkY * viChunkCount->y + chunkX;
-				
-				int tileX = std::fmodf(viNextPosition->x, (float)viChunkTileCount->x);
-				int tileY = std::fmodf(viNextPosition->y, (float)viChunkTileCount->y);
-				int tileIndex = (tileY * viChunkTileCount->y + tileX);
+				// set the new world position
+				positionCurrent.setWorldPosition(viCurrentPosition);
 
+				/*
 				// determine if collision in tile
-				if (IsCollision(chunkIndex, tileIndex) == true) {
+				if (IsCollision(positionCurrent.iChunkIndex, positionCurrent.iTileIndex) == true) {
 					// collision
-					// no player movement
+					// no player movement, therefore make the current world position match the previous world position
+					// the previous world position can stay as is, because a movement happened but failed.
+					positionCurrent = positionPrevious;
+
 					// update the world and run collision action
+
 					return false;
 				}
+				*/
 				
 				// no collision
 				// update the world and move player
-				if (iChunkIndex != chunkIndex) {
-					UpdateChunks(chunkX, chunkY);
+				if (positionCurrent.iChunkIndex != positionPrevious.iChunkIndex) {
+					LoadChunks(positionCurrent.iChunkX, positionCurrent.iChunkY);
 				}
 
 				// sort the chunk indexes
 				std::sort(vChunkIndexes.begin(), vChunkIndexes.end(), CompareByPosition());
-
-				// save the positions for use when determining world position
-				iChunkIndex = chunkIndex;
-				iTileIndex = tileIndex;
-				iChunkX = chunkX;
-				iChunkY = chunkY;
 
 				MovePlayerMapPosition();
 
@@ -383,7 +385,7 @@ namespace ScrollingMap
 				{
 					vChunk[vChunkIndexes[vChunkActiveIndexes[i]].index]->Render(pge, viCameraOffset);
 					// render the chunk index in the top left corner for debugging
-					pge->DrawString((vChunk[vChunkActiveIndexes[i]]->viPosition + *viCameraOffset) * *viTileSize, std::to_string(i), olc::BLACK);
+					pge->DrawString((vChunk[vChunkActiveIndexes[i]]->viPosition + *viCameraOffset) * *viTileSize, std::to_string(vChunkIndexes[vChunkActiveIndexes[i]].index), olc::BLACK);
 				}
 
 			}
@@ -428,19 +430,27 @@ namespace ScrollingMap
 
 				if (vChunk[chunkIndex]->vTiles[tileIndex]->eTileType == Tree) {
 					// collision. update nothing
-					// return true;
 					return true;
 				}
 				else {
-					// no collision, continue rendering normal movement 
-					// return false
-					
+					// no collision, continue rendering normal movement 					
 					return false;
 				}
 
 			}
+
+			int GenerateChunk(int x, int y)
+			{
+				vChunk.push_back(std::make_unique<chunk>(olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y),
+					viChunkTileCount, viTileSize));
+				//vChunkIndexes.push_back(chunkIndex(olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y), iChunkCount));
+				vChunkIndexes.push_back(chunkIndex(olc::vi2d(x, y), iChunkCount));
+				iChunkCount += 1;
+				return iChunkCount;
+
+			}
 			
-			void UpdateChunks(int positionChunkX, int positionChunkY) {
+			void LoadChunks(int positionChunkX, int positionChunkY) {
 
 				//////////////////////////////////////////////
 								
@@ -480,10 +490,18 @@ namespace ScrollingMap
 				*/
 
 				//vChunk[vChunkIndexes[iChunkIndex].index]->bPlayerInChunk = true;
-				sChunkLocation = "Chunk index: " + std::to_string(iChunkIndex) + " of " + std::to_string(vChunk.size());
+				sChunkLocation = "Chunk index: " + std::to_string(positionCurrent.iChunkIndex) + " of " + std::to_string(vChunk.size());
+				
+				if (positionCurrent.iChunkIndex > vChunk.size()) {
+					bool stop = true;
+				};
 
-				sTileLocation = "Tile index: " + std::to_string(iTileIndex) + " of " + std::to_string(vChunk[iChunkIndex]->vTiles.size());
-				sTileAwareness = "Tile Type: " + tileTypeName[vChunk[iChunkIndex]->vTiles[iTileIndex]->eTileType];
+				if (positionCurrent.iTileIndex > vChunk[positionCurrent.iChunkIndex]->vTiles.size()) {
+					bool stop = true;
+				};
+
+				sTileLocation = "Tile index: " + std::to_string(positionCurrent.iTileIndex) + " of " + std::to_string(vChunk[positionCurrent.iChunkIndex]->vTiles.size());
+				sTileAwareness = "Tile Type: " + tileTypeName[vChunk[positionCurrent.iChunkIndex]->vTiles[positionCurrent.iTileIndex]->eTileType];
 
 			}
 						
