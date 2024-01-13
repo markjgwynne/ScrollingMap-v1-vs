@@ -182,25 +182,18 @@ namespace ScrollingMap
 			vChunkIndexes = chunkIndexes;
 		}
 		int getChunkIndex(int position, int tileCount) {
-
-			iChunkX = position / tileCount * tileCount;
-
+			int index = std::floor(position / tileCount);
+			// if the position is a negative, shift the start of the chunk back by 1
+			if (position < 0) index -= 1;
+			return index;
 		}
 		bool setWorldPosition(olc::vi2d* position) {
 
 			viPosition = *position;
-
+				
 			// get chunk position
-			// // wokring on this.
-			//iChunkX = std::abs(std::floor((position->x / viChunkTileCount->x)));
-			//iChunkY = std::abs(std::floor((position->y / viChunkTileCount->y)));
-
-			if (viPosition.x < 0) {
-				int x = 0;
-			}
-			
-			iChunkX = viPosition.x / viChunkTileCount.x;
-			iChunkY = viPosition.y / viChunkTileCount.y;
+			iChunkX = getChunkIndex(viPosition.x, viChunkTileCount.x);
+			iChunkY = getChunkIndex(viPosition.y, viChunkTileCount.y);
 			
 			viChunkPosition = olc::vi2d(iChunkX, iChunkY);
 
@@ -385,7 +378,7 @@ namespace ScrollingMap
 				{
 					vChunk[vChunkIndexes[vChunkActiveIndexes[i]].index]->Render(pge, viCameraOffset);
 					// render the chunk index in the top left corner for debugging
-					pge->DrawString((vChunk[vChunkActiveIndexes[i]]->viPosition + *viCameraOffset) * *viTileSize, std::to_string(vChunkIndexes[vChunkActiveIndexes[i]].index), olc::BLACK);
+					pge->DrawString((vChunk[vChunkIndexes[vChunkActiveIndexes[i]].index]->viPosition + *viCameraOffset) * *viTileSize, std::to_string(vChunkIndexes[vChunkActiveIndexes[i]].index), olc::BLACK);
 				}
 
 			}
