@@ -19,6 +19,8 @@ namespace ScrollingMap
 		olc::vi2d *viTileSize;
 		olc::vi2d viNextPosition;
 
+		olc::vf2d vfHeldMovement;
+
 		xDirection xAxisDirection;
 		yDirection yAxisDirection;
 
@@ -52,32 +54,13 @@ namespace ScrollingMap
 			if (pge->GetKey(olc::Key::A).bPressed) viNextPosition.x -= 1;
 			if (pge->GetKey(olc::Key::D).bPressed) viNextPosition.x += 1;
 
-			/*
-			if (pge->GetKey(olc::Key::W).bHeld) viNextPosition.y -= iMovementSpeed * pge->GetElapsedTime();
-			if (pge->GetKey(olc::Key::S).bHeld) viNextPosition.y += iMovementSpeed * pge->GetElapsedTime();
-			if (pge->GetKey(olc::Key::A).bHeld) viNextPosition.x -= iMovementSpeed * pge->GetElapsedTime();
-			if (pge->GetKey(olc::Key::D).bHeld) viNextPosition.x += iMovementSpeed * pge->GetElapsedTime();
-			*/
-
-			if (viNextPosition.x > viPosition->x) {
-				// EAST, positive x axis movement
-				xAxisDirection = xDirection::EAST;
-			} else if (viNextPosition.x > viPosition->x) {
-				// WEST, negative x axis movement
-				xAxisDirection = xDirection::WEST;
-			} else {
-				xAxisDirection = xDirection::NONE_X;
-			}
-
-			if (viNextPosition.y > viPosition->y) {
-				// SOUTH, positive x axis movement
-				yAxisDirection = yDirection::SOUTH;
-			} else if (viNextPosition.y > viPosition->y) {
-				// NORTH, negative x axis movement
-				yAxisDirection = yDirection::NORTH;
-			} else {
-				yAxisDirection = yDirection::NONE_Y;
-			}
+			if (pge->GetKey(olc::Key::W).bHeld) vfHeldMovement.y -= iMovementSpeed * pge->GetElapsedTime();
+			if (pge->GetKey(olc::Key::S).bHeld) vfHeldMovement.y += iMovementSpeed * pge->GetElapsedTime();
+			if (pge->GetKey(olc::Key::A).bHeld) vfHeldMovement.x -= iMovementSpeed * pge->GetElapsedTime();
+			if (pge->GetKey(olc::Key::D).bHeld) vfHeldMovement.x += iMovementSpeed * pge->GetElapsedTime();
+			
+			if (vfHeldMovement.y > 1 || vfHeldMovement.y < -1) { viNextPosition.y += (int)vfHeldMovement.y; vfHeldMovement.y = 0; }
+			if (vfHeldMovement.x > 1 || vfHeldMovement.x < -1) { viNextPosition.x += (int)vfHeldMovement.x; vfHeldMovement.x = 0; }
 
 			return &viNextPosition;
 			

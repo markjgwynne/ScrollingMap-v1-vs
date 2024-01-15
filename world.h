@@ -103,9 +103,9 @@ namespace ScrollingMap
 			for (auto& tile : vTiles) // access by reference to avoid copying
 			{
 				tile->Render(pge, viCameraOffset);
-				if (i < viTileSize->x) {
+				//if (i < viTileSize->x) {
 					//pge->DrawString((tile->viPosition + *viCameraOffset) * *viTileSize, std::to_string(i), olc::BLACK);
-				}
+				//}
 				i += 1;
 			}
 
@@ -199,6 +199,10 @@ namespace ScrollingMap
 
 			// set the tile index based on the position
 			// the tile index cannot be negative
+
+			// THIS IS NOT WORKING ##########################################################################################
+			// when the moving to a negative Y axis the tile indexes are reversed
+			// fix it
 			iTileX = std::fmodf(std::abs(position->x), (float)viChunkTileCount.x);
 			iTileY = std::fmodf(std::abs(position->y), (float)viChunkTileCount.y);
 			iTileIndex = (iTileY * viChunkTileCount.y + iTileX);
@@ -207,7 +211,7 @@ namespace ScrollingMap
 
 			if (item != vChunkIndexes->end())
 			{
-				iChunkIndex = (int)(item - vChunkIndexes->begin());
+				iChunkIndex = item->index;// (int)(item - vChunkIndexes->begin());
 				return true;
 			}
 			else {
@@ -340,9 +344,9 @@ namespace ScrollingMap
 				positionPrevious = positionCurrent;
 
 				// set the new world position
-				positionCurrent.setWorldPosition(viCurrentPosition);
+				positionCurrent.setWorldPosition(viNextPosition);
 
-				/*
+				
 				// determine if collision in tile
 				if (IsCollision(positionCurrent.iChunkIndex, positionCurrent.iTileIndex) == true) {
 					// collision
@@ -354,7 +358,7 @@ namespace ScrollingMap
 
 					return false;
 				}
-				*/
+				
 				
 				// no collision
 				// update the world and move player
@@ -446,11 +450,6 @@ namespace ScrollingMap
 			void LoadChunks(int positionChunkX, int positionChunkY) {
 
 				//////////////////////////////////////////////
-								
-				// what about the visible chunks?
-				// do i delete and re-run this? 
-				// or is there a way to update it, ie replace previous with new?
-
 				// add all chunk indexes to active chunk vector
 				
 				vChunkActiveIndexes.clear();
@@ -462,7 +461,7 @@ namespace ScrollingMap
 						int index;
 						if (it != vChunkIndexes.end())
 						{
-							index = (int)(it - vChunkIndexes.begin());
+							index = it->index;
 						}
 						else {
 							index = GenerateChunk(x, y) - 1;
@@ -476,23 +475,7 @@ namespace ScrollingMap
 
 			void MovePlayerMapPosition() {
 
-				/*
-				for (int i = 0; i < vChunkActiveIndexes.size(); i++) {
-					vChunk[vChunkIndexes[i].index]->bPlayerInChunk = false;
-				}
-				*/
-
-				//vChunk[vChunkIndexes[iChunkIndex].index]->bPlayerInChunk = true;
 				sChunkLocation = "Chunk index: " + std::to_string(positionCurrent.iChunkIndex) + " of " + std::to_string(vChunk.size());
-				
-				if (positionCurrent.iChunkIndex > vChunk.size()) {
-					bool stop = true;
-				};
-
-				if (positionCurrent.iTileIndex > vChunk[positionCurrent.iChunkIndex]->vTiles.size()) {
-					bool stop = true;
-				};
-
 				sTileLocation = "Tile index: " + std::to_string(positionCurrent.iTileIndex) + " of " + std::to_string(vChunk[positionCurrent.iChunkIndex]->vTiles.size());
 				sTileAwareness = "Tile Type: " + tileTypeName[vChunk[positionCurrent.iChunkIndex]->vTiles[positionCurrent.iTileIndex]->eTileType];
 
