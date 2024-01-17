@@ -90,8 +90,17 @@ namespace ScrollingMap
 
 		void GenerateTiles()
 		{
-			for (int y = 0; y < viChunkTileCount->y; y++) {
-				for (int x = 0; x < viChunkTileCount->x; x++) {			
+			if (viPosition.x < 0) {
+				bool testing = true;
+			}
+			// do something here to detect if the y is less than zero.
+			// do i need to do the same for x?
+			// ie, it counts from x = -16 to 0 which is correct, but starts at y = -16, then works up, 
+			//    which means the lower indexes are at the bottom of the chunk!
+			// ##################################################################################################
+			// the solution i have isnt quite working. I need to y-- or x-- i think...
+			for (int y = (viPosition.y < 0 ? 0 : viPosition.y); y < viChunkTileCount->y; y++) {
+				for (int x = (viPosition.x < 0 ? 0 : viPosition.x); x < viChunkTileCount->x; x++) {
 					vTiles.push_back(std::make_unique<tile>(olc::vi2d(viPosition.x + x, viPosition.y + y), viTileSize));
 				}
 			}
