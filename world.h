@@ -124,9 +124,9 @@ namespace ScrollingMap
 			for (auto& tile : vTiles) // access by reference to avoid copying
 			{
 				tile->Render(pge, viCameraOffset);
-				//if (i < viTileSize->x) {
-					//pge->DrawString((tile->viPosition + *viCameraOffset) * *viTileSize, std::to_string(i), olc::BLACK);
-				//}
+				if (i < 10) {
+					pge->DrawString((tile->viPosition + *viCameraOffset) * *viTileSize, std::to_string(i), olc::BLACK);
+				}
 				i += 1;
 			}
 
@@ -209,6 +209,10 @@ namespace ScrollingMap
 			return index;
 		}
 		bool setWorldPosition(olc::vi2d* position) {
+			// THIS IS NOT WORKING ##########################################################################################
+			// the chunk index appears to be not working now that the tile generation is working.
+			// check the negative coordinate logic for chunk determination
+			// then check the tileIndex determination
 
 			viPosition = *position;
 				
@@ -218,12 +222,6 @@ namespace ScrollingMap
 			
 			viChunkPosition = olc::vi2d(iChunkX, iChunkY);
 
-			// set the tile index based on the position
-			// the tile index cannot be negative
-
-			// THIS IS NOT WORKING ##########################################################################################
-			// when the moving to a negative Y axis the tile indexes are reversed
-			// fix it
 			iTileX = std::fmodf(std::abs(position->x), (float)viChunkTileCount.x);
 			iTileY = std::fmodf(std::abs(position->y), (float)viChunkTileCount.y);
 			iTileIndex = (iTileY * viChunkTileCount.y + iTileX);
