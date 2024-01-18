@@ -98,9 +98,21 @@ namespace ScrollingMap
 			// ie, it counts from x = -16 to 0 which is correct, but starts at y = -16, then works up, 
 			//    which means the lower indexes are at the bottom of the chunk!
 			// ##################################################################################################
-			// the solution i have isnt quite working. I need to y-- or x-- i think...
-			for (int y = (viPosition.y < 0 ? 0 : viPosition.y); y < viChunkTileCount->y; y++) {
-				for (int x = (viPosition.x < 0 ? 0 : viPosition.x); x < viChunkTileCount->x; x++) {
+			
+			/*
+			* My entire understanding of chunk rendering changed. The above was to troubleshoot problems with identification of the tileindex
+			* I was using my chunk starting location when in negative (-16, -16) as the starting point, then counting up from there.
+			* While this seems fine, the order gets messed up. The order / indexes of tiles needs to go from point (0, 0) outwards. It needs to
+			* count up in the positive directions and down in the negative direction.
+			* This takes some work, as can be seen below.
+			* 
+			* Now this is done, the method of determining the tileIndex needs work!
+			*/
+
+			// the minus one against the viChunkTileCount when initialising is to ensure only one chunk takes the 0, 0 x and y.
+			
+			for (int y = (viPosition.y < 0) ? viChunkTileCount->y-1 : 0; (viPosition.y < 0) ? y > 0 : y < viChunkTileCount->y; y+=(viPosition.y < 0) ? -1 : 1 ) {
+				for (int x = (viPosition.x < 0) ? viChunkTileCount->x-1 : 0; (viPosition.x < 0) ? x > 0 : x < viChunkTileCount->x; x+=(viPosition.x < 0) ? -1 : 1 ) {
 					vTiles.push_back(std::make_unique<tile>(olc::vi2d(viPosition.x + x, viPosition.y + y), viTileSize));
 				}
 			}
