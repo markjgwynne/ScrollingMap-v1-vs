@@ -111,8 +111,8 @@ namespace ScrollingMap
 
 			// the minus one against the viChunkTileCount when initialising is to ensure only one chunk takes the 0, 0 x and y.
 			
-			for (int y = (viPosition.y < 0) ? viChunkTileCount->y-1 : 0; (viPosition.y < 0) ? y > 0 : y < viChunkTileCount->y; y+=(viPosition.y < 0) ? -1 : 1 ) {
-				for (int x = (viPosition.x < 0) ? viChunkTileCount->x-1 : 0; (viPosition.x < 0) ? x > 0 : x < viChunkTileCount->x; x+=(viPosition.x < 0) ? -1 : 1 ) {
+			for (int y = (viPosition.y < 0) ? viChunkTileCount->y -1 : 0; (viPosition.y < 0) ? y >= 0 : y < viChunkTileCount->y; y+=(viPosition.y < 0) ? -1 : 1 ) {
+				for (int x = (viPosition.x < 0) ? viChunkTileCount->x-1 : 0; (viPosition.x < 0) ? x >= 0 : x < viChunkTileCount->x; x+=(viPosition.x < 0) ? -1 : 1 ) {
 					vTiles.push_back(std::make_unique<tile>(olc::vi2d(viPosition.x + x, viPosition.y + y), viTileSize));
 				}
 			}
@@ -202,10 +202,15 @@ namespace ScrollingMap
 			viChunkTileCount = *chunkTileCount;
 			vChunkIndexes = chunkIndexes;
 		}
-		int getChunkIndex(int position, int tileCount) {
+		int getChunkIndexes(int position, float tileCount) {
 			int index = std::floor(position / tileCount);
-			// if the position is a negative, shift the start of the chunk back by 1
-			if (position < 0) index -= 1;
+			return index;
+		}
+		int getTileIndex(int pX, int pY, float tileCount) {
+
+			if (pX < 0) pX = std::abs(pX) - 1;
+			if (pY < 0) pY = std::abs(pY) - 1;
+			int index = pY * tileCount + pX;
 			return index;
 		}
 		bool setWorldPosition(olc::vi2d* position) {
@@ -215,17 +220,15 @@ namespace ScrollingMap
 			// then check the tileIndex determination
 
 			viPosition = *position;
-				
+			
 			// get chunk position
-			iChunkX = getChunkIndex(viPosition.x, viChunkTileCount.x);
-			iChunkY = getChunkIndex(viPosition.y, viChunkTileCount.y);
+			iChunkX = getChunkIndexes(viPosition.x, (float)viChunkTileCount.x);
+			iChunkY = getChunkIndexes(viPosition.y, (float)viChunkTileCount.y);
 			
 			viChunkPosition = olc::vi2d(iChunkX, iChunkY);
 
-			iTileX = std::fmodf(std::abs(position->x), (float)viChunkTileCount.x);
-			iTileY = std::fmodf(std::abs(position->y), (float)viChunkTileCount.y);
-			iTileIndex = (iTileY * viChunkTileCount.y + iTileX);
-
+			iTileIndex = getTileIndex(position->x, position->y, (float)viChunkTileCount.x);
+			
 			auto item = find(vChunkIndexes->begin(), vChunkIndexes->end(), viChunkPosition);
 
 			if (item != vChunkIndexes->end())
@@ -446,7 +449,7 @@ namespace ScrollingMap
 
 				if (vChunk[chunkIndex]->vTiles[tileIndex]->eTileType == Tree) {
 					// collision. update nothing
-					return true;
+					return false;
 				}
 				else {
 					// no collision, continue rendering normal movement 					
