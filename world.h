@@ -125,7 +125,7 @@ namespace ScrollingMap
 			{
 				tile->Render(pge, viCameraOffset);
 				if (i < 10) {
-					pge->DrawString((tile->viPosition + *viCameraOffset) * *viTileSize, std::to_string(i), olc::BLACK);
+					//pge->DrawString((tile->viPosition + *viCameraOffset) * *viTileSize, std::to_string(i), olc::BLACK);
 				}
 				i += 1;
 			}
@@ -208,9 +208,21 @@ namespace ScrollingMap
 		}
 		int getTileIndex(int pX, int pY, float tileCount) {
 
+			if (pY < -16) {
+				bool fail = true;
+			}
+
 			if (pX < 0) pX = std::abs(pX) - 1;
 			if (pY < 0) pY = std::abs(pY) - 1;
+
+			//if (pX < 0) pX = std::fmod(std::abs(pX), tileCount) - 1;
+			//if (pY < 0) pY = std::fmod(std::abs(pY), tileCount) - 1;
+
 			int index = pY * tileCount + pX;
+
+			if (index > 255) {
+				bool fail = true;
+			}
 			return index;
 		}
 		bool setWorldPosition(olc::vi2d* position) {
@@ -227,7 +239,7 @@ namespace ScrollingMap
 			
 			viChunkPosition = olc::vi2d(iChunkX, iChunkY);
 
-			iTileIndex = getTileIndex(position->x, position->y, (float)viChunkTileCount.x);
+			iTileIndex = getTileIndex(viPosition.x, viPosition.y, (float)viChunkTileCount.x);
 			
 			auto item = find(vChunkIndexes->begin(), vChunkIndexes->end(), viChunkPosition);
 
