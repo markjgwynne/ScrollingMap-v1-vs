@@ -206,21 +206,21 @@ namespace ScrollingMap
 			int index = std::floor(position / tileCount);
 			return index;
 		}
-		int getTileIndex(int pX, int pY, float tileCount) {
+		int getTileIndex(int pX, int pY, int tileCount) {
 
 			if (pY < -16) {
 				bool fail = true;
 			}
 
-			if (pX < 0) pX = std::abs(pX) - 1;
-			if (pY < 0) pY = std::abs(pY) - 1;
+			if (pX < 0) pX = std::abs(pX % tileCount) - 1;
+			if (pY < 0) pY = std::abs(pY % tileCount) - 1;
 
 			//if (pX < 0) pX = std::fmod(std::abs(pX), tileCount) - 1;
 			//if (pY < 0) pY = std::fmod(std::abs(pY), tileCount) - 1;
 
 			int index = pY * tileCount + pX;
 
-			if (index > 255) {
+			if (index > 255 || index < 0) {
 				bool fail = true;
 			}
 			return index;
@@ -239,7 +239,7 @@ namespace ScrollingMap
 			
 			viChunkPosition = olc::vi2d(iChunkX, iChunkY);
 
-			iTileIndex = getTileIndex(viPosition.x, viPosition.y, (float)viChunkTileCount.x);
+			iTileIndex = getTileIndex(viPosition.x, viPosition.y, viChunkTileCount.x);
 			
 			auto item = find(vChunkIndexes->begin(), vChunkIndexes->end(), viChunkPosition);
 
