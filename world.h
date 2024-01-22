@@ -212,11 +212,8 @@ namespace ScrollingMap
 				bool fail = true;
 			}
 
-			if (pX < 0) pX = std::abs(pX % tileCount) - 1;
-			if (pY < 0) pY = std::abs(pY % tileCount) - 1;
-
-			//if (pX < 0) pX = std::fmod(std::abs(pX), tileCount) - 1;
-			//if (pY < 0) pY = std::fmod(std::abs(pY), tileCount) - 1;
+			if (pX < 0) pX = ((std::abs(pX) - 1) % tileCount);
+			if (pY < 0) pY = ((std::abs(pY) - 1) % tileCount);
 
 			int index = pY * tileCount + pX;
 
@@ -412,11 +409,13 @@ namespace ScrollingMap
 			void Render(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
 
 				// pixel rendering
-				for (int i = 0; i < vChunkActiveIndexes.size(); i++)
-				{
-					vChunk[vChunkIndexes[vChunkActiveIndexes[i]].index]->Render(pge, viCameraOffset);
-					// render the chunk index in the top left corner for debugging
-					pge->DrawString((vChunk[vChunkIndexes[vChunkActiveIndexes[i]].index]->viPosition + *viCameraOffset) * *viTileSize, std::to_string(vChunkIndexes[vChunkActiveIndexes[i]].index), olc::BLACK);
+				for (int a = 0; a < vChunkActiveIndexes.size(); a++)
+					for (int i = 0; i < vChunkIndexes.size(); i++) {
+						if (vChunkActiveIndexes[a] == vChunkIndexes[i].index) {
+							vChunk[vChunkIndexes[i].index]->Render(pge, viCameraOffset);
+							// render the chunk index in the top left corner for debugging
+							pge->DrawString((vChunk[vChunkIndexes[i].index]->viPosition + *viCameraOffset) * *viTileSize, std::to_string(vChunkIndexes[i].index), olc::BLACK);
+						}
 				}
 
 			}
@@ -461,7 +460,7 @@ namespace ScrollingMap
 
 				if (vChunk[chunkIndex]->vTiles[tileIndex]->eTileType == Tree) {
 					// collision. update nothing
-					return false;
+					return true;
 				}
 				else {
 					// no collision, continue rendering normal movement 					
