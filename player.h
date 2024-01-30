@@ -2,6 +2,7 @@
 
 using namespace std;
 
+#include "sharedUtilities.h"
 #include "olcPixelGameEngine.h"
 
 #ifndef PLAYER_H_INCLUDED
@@ -9,6 +10,7 @@ using namespace std;
 
 namespace ScrollingMap
 {
+
 	class Character
 	{
 	public:
@@ -16,6 +18,11 @@ namespace ScrollingMap
 		olc::vi2d *viPosition;
 		olc::vi2d *viTileSize;
 		olc::vi2d viNextPosition;
+
+		olc::vf2d vfHeldMovement;
+
+		xDirection xAxisDirection;
+		yDirection yAxisDirection;
 
 		std::string sPlayerLocation;
 
@@ -29,6 +36,8 @@ namespace ScrollingMap
 			viPosition = position;
 			viNextPosition = *position;
 			viTileSize = tileSize;
+			xAxisDirection = xDirection::NONE_X;
+			yAxisDirection = yDirection::NONE_Y;
 
 		}
 		~Character() {
@@ -45,12 +54,14 @@ namespace ScrollingMap
 			if (pge->GetKey(olc::Key::A).bPressed) viNextPosition.x -= 1;
 			if (pge->GetKey(olc::Key::D).bPressed) viNextPosition.x += 1;
 
-			/*
-			if (pge->GetKey(olc::Key::W).bHeld) viNextPosition.y -= iMovementSpeed * pge->GetElapsedTime();
-			if (pge->GetKey(olc::Key::S).bHeld) viNextPosition.y += iMovementSpeed * pge->GetElapsedTime();
-			if (pge->GetKey(olc::Key::A).bHeld) viNextPosition.x -= iMovementSpeed * pge->GetElapsedTime();
-			if (pge->GetKey(olc::Key::D).bHeld) viNextPosition.x += iMovementSpeed * pge->GetElapsedTime();
-			*/
+			if (pge->GetKey(olc::Key::W).bHeld) vfHeldMovement.y -= iMovementSpeed * pge->GetElapsedTime();
+			if (pge->GetKey(olc::Key::S).bHeld) vfHeldMovement.y += iMovementSpeed * pge->GetElapsedTime();
+			if (pge->GetKey(olc::Key::A).bHeld) vfHeldMovement.x -= iMovementSpeed * pge->GetElapsedTime();
+			if (pge->GetKey(olc::Key::D).bHeld) vfHeldMovement.x += iMovementSpeed * pge->GetElapsedTime();
+			
+			if (vfHeldMovement.y > 1 || vfHeldMovement.y < -1) { viNextPosition.y += (int)vfHeldMovement.y; vfHeldMovement.y = 0; }
+			if (vfHeldMovement.x > 1 || vfHeldMovement.x < -1) { viNextPosition.x += (int)vfHeldMovement.x; vfHeldMovement.x = 0; }
+
 			return &viNextPosition;
 			
 		}

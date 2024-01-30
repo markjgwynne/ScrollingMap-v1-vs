@@ -30,7 +30,7 @@ namespace ScrollingMap
 		{
 			
 		}
-				
+		
 		float fMovementIncrement = 100.0f;
 
 		/*
@@ -39,24 +39,22 @@ namespace ScrollingMap
 			Any assets or positions that are drived from the screen location need to be divided by the tileSize to obtain the grid position.
 		*/
 
-		olc::vi2d viPlayerPos = { 101, 101 };
+		olc::vi2d viPlayerPos = { 10, 10 };
 		olc::vi2d viCameraOffset = { 0, 0 };
 		
-		olc::vi2d chunkCount = { 20, 20 };
-		olc::vi2d tileCount = { 8, 8 };
+		olc::vi2d chunkCount = { 4, 4 };
+		olc::vi2d tileCount = { 16, 16 };
 		olc::vi2d tileSize = { 16, 16 };
 		olc::vi2d renderDistance = { 1, 1 };
 
-		bool useSprites = true;
+		bool useSprites = false;
 
 		GameWorld world = GameWorld(&chunkCount, &tileCount, &tileSize, &renderDistance);
 		Character player = Character(&viPlayerPos, &tileSize);
 
-		olc::Sprite* sprTest = nullptr;
-
 		bool OnUserCreate() override
 		{
-			world.GenerateChunks(this , &viPlayerPos);
+			viPlayerPos = world.GenerateWorld(this, 123);
 
 			if (useSprites) {
 				player.GenerateSprite(this);
@@ -72,8 +70,7 @@ namespace ScrollingMap
 			Clear(olc::WHITE);
 
 			// HANDLE MOVEMENT AND COLLISION DETECTION
-			
-			if (world.IsCollision(this, player.GetNextPosition(this)) == false) {
+			if (world.UpdatePlayerPosition(this, player.viPosition, player.GetNextPosition(this)) == true) {
 				player.SetNextPosition();
 			};
 			
@@ -99,11 +96,15 @@ namespace ScrollingMap
 				player.Render(this, &viCameraOffset);
 			}
 
-			DrawString(1, 1, player.sPlayerLocation, olc::WHITE);
-			DrawString(1, 11, world.sSpriteRenderLocation, olc::WHITE);
-			DrawString(1, 21, world.sChunkLocation, olc::WHITE);
-			DrawString(1, 31, world.sTileLocation, olc::WHITE);
-			DrawString(1, 41, world.sTileAwareness, olc::WHITE);
+			int sY = 1, textHeight = 10;
+
+			DrawString(1, sY, player.sPlayerLocation, olc::BLACK);
+			if (useSprites) {
+				DrawString(1, sY += textHeight, world.sSpriteRenderLocation, olc::BLACK);
+			}
+			DrawString(1, sY += textHeight, world.sChunkLocation, olc::BLACK);
+			DrawString(1, sY += textHeight, world.sTileLocation, olc::BLACK);
+			DrawString(1, sY += textHeight, world.sTileAwareness, olc::BLACK);
 			
 			return true;
 		}
