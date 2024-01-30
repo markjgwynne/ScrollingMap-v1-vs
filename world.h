@@ -208,12 +208,11 @@ namespace ScrollingMap
 		}
 		int getTileIndex(int pX, int pY, int tileCount) {
 
-			if (pY < -16) {
-				bool fail = true;
-			}
+			if (pX < 0) pX = (std::abs(pX) - 1);
+			if (pY < 0) pY = (std::abs(pY) - 1);
 
-			if (pX < 0) pX = ((std::abs(pX) - 1) % tileCount);
-			if (pY < 0) pY = ((std::abs(pY) - 1) % tileCount);
+			pX = pX % tileCount;
+			pY = pY % tileCount;
 
 			int index = pY * tileCount + pX;
 
