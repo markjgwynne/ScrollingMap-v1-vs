@@ -23,29 +23,32 @@ namespace ScrollingMap
 		olc::vi2d viPosition;
 		olc::vi2d *viTileSize;
 		tiletype eTileType;
+		int* iSeed;
 
 		tile() {};
 
-		tile(olc::vi2d position, olc::vi2d* tileSize) {
+		tile(olc::vi2d position, olc::vi2d* tileSize, int* seed) {
 			
-			SetPosition(position, tileSize);
+			SetPosition(position, tileSize, seed);
 		}
 
 		~tile() {
 			
 		}
 
-		void SetPosition(olc::vi2d position, olc::vi2d* tileSize) {
+		void SetPosition(olc::vi2d position, olc::vi2d* tileSize, int* seed) {
 			viPosition = position;
 			viTileSize = tileSize;
 			eTileType = Grass;
+			iSeed = seed;
 
 			AddLayerTrees();
 		}
 
 		void AddLayerTrees() {
 
-			if (rand() % 6 == 0) eTileType = Tree;
+			if (((viPosition.x + viPosition.y) % *iSeed) == 0) eTileType = Tree;
+			//if (rand() % 6 == 0) eTileType = Tree;
 
 		}
 
@@ -65,10 +68,11 @@ namespace ScrollingMap
 		olc::vi2d *viTileSize;
 		bool bPlayerInChunk;
 		bool bRenderChunk;
+		int* iSeed;
 
-		std::vector<std::unique_ptr<tile>> vTiles;
+		std::vector<vector<std::unique_ptr<tile>>> vTiles;
 		
-		chunk(olc::vi2d position, olc::vi2d* tileCount, olc::vi2d* tileSize) {
+		chunk(olc::vi2d position, olc::vi2d* tileCount, olc::vi2d* tileSize, int* seed) {
 			
 			viPosition = position;
 			viChunkTileCount = tileCount;
@@ -76,6 +80,7 @@ namespace ScrollingMap
 
 			bPlayerInChunk = false;
 			bRenderChunk = false;
+			iSeed = seed;
 			
 			GenerateTiles();
 		}
@@ -90,15 +95,6 @@ namespace ScrollingMap
 
 		void GenerateTiles()
 		{
-			if (viPosition.x < 0) {
-				bool testing = true;
-			}
-			// do something here to detect if the y is less than zero.
-			// do i need to do the same for x?
-			// ie, it counts from x = -16 to 0 which is correct, but starts at y = -16, then works up, 
-			//    which means the lower indexes are at the bottom of the chunk!
-			// ##################################################################################################
-			
 			/*
 			* My entire understanding of chunk rendering changed. The above was to troubleshoot problems with identification of the tileindex
 			* I was using my chunk starting location when in negative (-16, -16) as the starting point, then counting up from there.
@@ -111,23 +107,27 @@ namespace ScrollingMap
 
 			// the minus one against the viChunkTileCount when initialising is to ensure only one chunk takes the 0, 0 x and y.
 			
-			for (int y = (viPosition.y < 0) ? viChunkTileCount->y -1 : 0; (viPosition.y < 0) ? y >= 0 : y < viChunkTileCount->y; y+=(viPosition.y < 0) ? -1 : 1 ) {
-				for (int x = (viPosition.x < 0) ? viChunkTileCount->x-1 : 0; (viPosition.x < 0) ? x >= 0 : x < viChunkTileCount->x; x+=(viPosition.x < 0) ? -1 : 1 ) {
-					vTiles.push_back(std::make_unique<tile>(olc::vi2d(viPosition.x + x, viPosition.y + y), viTileSize));
+			for (int y = (viPosition.y < 0) ? viChunkTileCount->y - 1 : 0; (viPosition.y < 0) ? y >= 0 : y < viChunkTileCount->y; y += (viPosition.y < 0) ? -1 : 1) {
+				
+				std::vector<std::unique_ptr<tile>> col;
+
+				for (int x = (viPosition.x < 0) ? viChunkTileCount->x - 1 : 0; (viPosition.x < 0) ? x >= 0 : x < viChunkTileCount->x; x += (viPosition.x < 0) ? -1 : 1) {
+					col.push_back(std::make_unique<tile>(olc::vi2d(viPosition.x + x, viPosition.y + y), viTileSize, iSeed));
 				}
+				vTiles.push_back(std::move(col));
+
 			}
+
+
 		}
 
 		void Render(olc::PixelGameEngine* pge, olc::vi2d* viCameraOffset) {
 
-			int i = 0;
-			for (auto& tile : vTiles) // access by reference to avoid copying
+			for (auto& y : vTiles) // access by reference to avoid copying
 			{
-				tile->Render(pge, viCameraOffset);
-				if (i < 10) {
-					//pge->DrawString((tile->viPosition + *viCameraOffset) * *viTileSize, std::to_string(i), olc::BLACK);
+				for (auto& x : y) {
+					x->Render(pge, viCameraOffset);
 				}
-				i += 1;
 			}
 
 		}
@@ -190,8 +190,7 @@ namespace ScrollingMap
 		int iChunkIndex;
 		olc::vi2d viChunkPosition;
 		int iTileX;
-		int iTileY;
-		int iTileIndex;		
+		int iTileY;	
 		std::vector<chunkIndex>* vChunkIndexes;
 
 		worldPosition()
@@ -206,37 +205,25 @@ namespace ScrollingMap
 			int index = std::floor(position / tileCount);
 			return index;
 		}
-		int getTileIndex(int pX, int pY, int tileCount) {
+		int getTileIndex(int p, int tileCount) {
 
-			if (pX < 0) pX = (std::abs(pX) - 1);
-			if (pY < 0) pY = (std::abs(pY) - 1);
-
-			pX = pX % tileCount;
-			pY = pY % tileCount;
-
-			int index = pY * tileCount + pX;
-
-			if (index > 255 || index < 0) {
-				bool fail = true;
-			}
+			if (p < 0) p = (std::abs(p) - 1);
+			
+			int index = p % tileCount;
+			
 			return index;
 		}
 		bool setWorldPosition(olc::vi2d* position) {
-			// THIS IS NOT WORKING ##########################################################################################
-			// the chunk index appears to be not working now that the tile generation is working.
-			// check the negative coordinate logic for chunk determination
-			// then check the tileIndex determination
-
 			viPosition = *position;
 			
-			// get chunk position
 			iChunkX = getChunkIndexes(viPosition.x, (float)viChunkTileCount.x);
 			iChunkY = getChunkIndexes(viPosition.y, (float)viChunkTileCount.y);
 			
 			viChunkPosition = olc::vi2d(iChunkX, iChunkY);
 
-			iTileIndex = getTileIndex(viPosition.x, viPosition.y, viChunkTileCount.x);
-			
+			iTileX = getTileIndex(viPosition.x, viChunkTileCount.x);
+			iTileY = getTileIndex(viPosition.y, viChunkTileCount.x);
+
 			auto item = find(vChunkIndexes->begin(), vChunkIndexes->end(), viChunkPosition);
 
 			if (item != vChunkIndexes->end())
@@ -293,9 +280,9 @@ namespace ScrollingMap
 			olc::vi2d GenerateWorld(olc::PixelGameEngine* pge, int worldSeed) {
 
 				//doesnt currently do anything.
-				/*
+				
 				seed = worldSeed;
-
+				/*
 				// Create a random number generator and seed it with a fixed value
 				std::mt19937 generator(seed);
 
@@ -378,7 +365,7 @@ namespace ScrollingMap
 
 				
 				// determine if collision in tile
-				if (IsCollision(positionCurrent.iChunkIndex, positionCurrent.iTileIndex) == true) {
+				if (IsCollision(positionCurrent) == true) {
 					// collision
 					// no player movement, therefore make the current world position match the previous world position
 					// the previous world position can stay as is, because a movement happened but failed.
@@ -454,10 +441,10 @@ namespace ScrollingMap
 
 		private:
 			
-			bool IsCollision(int chunkIndex, int tileIndex) {
+			bool IsCollision(worldPosition wpPositionCurrent) {
 				//x * chunkCountWidth + y;
 
-				if (vChunk[chunkIndex]->vTiles[tileIndex]->eTileType == Tree) {
+				if (vChunk[wpPositionCurrent.iChunkIndex]->vTiles[wpPositionCurrent.iTileY][wpPositionCurrent.iTileX]->eTileType == Tree) {
 					// collision. update nothing
 					return true;
 				}
@@ -471,7 +458,7 @@ namespace ScrollingMap
 			int GenerateChunk(int x, int y)
 			{
 				vChunk.push_back(std::make_unique<chunk>(olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y),
-					viChunkTileCount, viTileSize));
+					viChunkTileCount, viTileSize, &seed));
 				//vChunkIndexes.push_back(chunkIndex(olc::vi2d(x * viChunkTileCount->x, y * viChunkTileCount->y), iChunkCount));
 				vChunkIndexes.push_back(chunkIndex(olc::vi2d(x, y), iChunkCount));
 				iChunkCount += 1;
@@ -508,8 +495,8 @@ namespace ScrollingMap
 			void MovePlayerMapPosition() {
 
 				sChunkLocation = "Chunk index: " + std::to_string(positionCurrent.iChunkIndex) + " of " + std::to_string(vChunk.size());
-				sTileLocation = "Tile index: " + std::to_string(positionCurrent.iTileIndex) + " of " + std::to_string(vChunk[positionCurrent.iChunkIndex]->vTiles.size());
-				sTileAwareness = "Tile Type: " + tileTypeName[vChunk[positionCurrent.iChunkIndex]->vTiles[positionCurrent.iTileIndex]->eTileType];
+				sTileLocation = "Tile index: x:" + std::to_string(positionCurrent.iTileX) + ", y: " + std::to_string(positionCurrent.iTileY);
+				sTileAwareness = "Tile Type: " + tileTypeName[vChunk[positionCurrent.iChunkIndex]->vTiles[positionCurrent.iTileX][positionCurrent.iTileY]->eTileType];
 
 			}
 						
