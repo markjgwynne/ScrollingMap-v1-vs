@@ -47,8 +47,8 @@ namespace ScrollingMap
 
 		void AddLayerTrees() {
 
-			if (((viPosition.x + viPosition.y) % *iSeed) == 0) eTileType = Tree;
-			//if (rand() % 6 == 0) eTileType = Tree;
+			//if (((viPosition.x + viPosition.y) % *iSeed) == 0) eTileType = Tree;
+			if (rand() % 6 == 0) eTileType = Tree;
 
 		}
 
