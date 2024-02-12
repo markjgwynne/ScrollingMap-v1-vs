@@ -47,7 +47,6 @@ namespace ScrollingMap
 
 		void AddLayerTrees() {
 
-			//if (((viPosition.x + viPosition.y) % *iSeed) == 0) eTileType = Tree;
 			if (rand() % 6 == 0) eTileType = Tree;
 
 		}
@@ -282,6 +281,12 @@ namespace ScrollingMap
 				//doesnt currently do anything.
 				
 				seed = worldSeed;
+
+				srand(worldSeed);
+
+				
+
+
 				/*
 				// Create a random number generator and seed it with a fixed value
 				std::mt19937 generator(seed);
